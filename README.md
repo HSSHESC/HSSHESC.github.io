@@ -2,7 +2,7 @@
 
 한성과학고등학교 정보공학 동아리 ESC 소개 웹사이트입니다.
 
-배포 주소: https://hsshesc.github.io/ESC/
+배포 주소: https://hsshesc.github.io/
 
 ## 구조
 
