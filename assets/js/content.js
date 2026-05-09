@@ -26,6 +26,7 @@ window.ESC_CONTENT = {
                 "2025 서울학생 AI개발 성과발표회에서 동상과 인기상 수상",
             image: "assets/img/2025-12-22.jpg",
             icon: "bi-robot",
+            href: "https://github.com/HSSHESC/enemy-jungle-locator",
         },
         {
             title: "2025 수학과학체험전",
