@@ -56,6 +56,11 @@ a:hover {
     transition: all 0.5s ease-in-out;
 }
 
+.school-link,
+.school-link:hover {
+    text-decoration: underline;
+}
+
 .p-r {
     position: relative;
 }
@@ -1004,6 +1009,11 @@ a:hover {
     color: var(--head);
     font-size: 1.2rem;
     font-weight: 700;
+}
+
+.portfolio-title-link,
+.portfolio-title-link:hover {
+    text-decoration: underline;
 }
 
 .portfolio-date {

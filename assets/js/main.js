@@ -204,12 +204,18 @@
         portfolioItems.innerHTML = portfolioData
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map(
-                (item) => `
+                (item) => {
+                    const title = escapeHtml(item.title);
+                    const titleMarkup = item.href
+                        ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
+                        : title;
+
+                    return `
                     <div class="col-lg-6">
                         <div class="portfolio-item">
                             <img
                                 src="${escapeHtml(item.image)}"
-                                alt="${escapeHtml(item.title)}"
+                                alt="${title}"
                                 class="portfolio-thumb portfolio-zoom-image"
                                 role="button"
                                 tabindex="0"
@@ -219,14 +225,15 @@
                                     <i class="bi ${escapeHtml(item.icon)}"></i>
                                 </div>
                                 <div>
-                                    <h4 class="portfolio-title">${escapeHtml(item.title)}</h4>
+                                    <h4 class="portfolio-title">${titleMarkup}</h4>
                                     <div class="portfolio-date">${escapeHtml(item.date)}</div>
                                     <p class="portfolio-description">${escapeHtml(item.description)}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                `,
+                `;
+                },
             )
             .join("");
     }
