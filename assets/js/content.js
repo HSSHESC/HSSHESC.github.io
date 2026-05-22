@@ -3,6 +3,19 @@
 window.ESC_CONTENT = {
     portfolio: [
         {
+            title: "2026 수학과학체험전",
+            date: "2026-05-21",
+            description: "중학생 대상 수학과학체험전 활동을 기획하고 운영",
+            image: "assets/img/2026-05-21 (1).png",
+            images: [
+                "assets/img/2026-05-21 (1).png",
+                "assets/img/2026-05-21 (2).png",
+                "assets/img/2026-05-21 (3).png",
+            ],
+            icon: "bi-mortarboard-fill",
+            href: "https://github.com/HSSHESC/sugwachae_2026",
+        },
+        {
             title: "2026 동아리 박람회",
             date: "2026-03-05",
             description:
@@ -16,6 +29,11 @@ window.ESC_CONTENT = {
             description:
                 "LoL 정글 위치 예측 프로그램, 리듬 게임, 모자이크, 3D 체스를 개발하여 부스 운영",
             image: "assets/img/2025-12-24.png",
+            images: [
+                "assets/img/2025-12-24.png",
+                "assets/img/2025-12-24 (2).png",
+                "assets/img/2025-12-24 (3).png",
+            ],
             icon: "bi-shop-window",
             href: "https://2025haneuljae-static.vercel.app/",
         },
@@ -25,6 +43,10 @@ window.ESC_CONTENT = {
             description:
                 "2025 서울학생 AI개발 성과발표회에서 동상과 인기상 수상",
             image: "assets/img/2025-12-22.jpg",
+            images: [
+                "assets/img/2025-12-22.jpg",
+                "assets/img/2025-12-22 (2).png",
+            ],
             icon: "bi-robot",
             href: "https://github.com/HSSHESC/enemy-jungle-locator",
         },

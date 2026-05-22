@@ -975,14 +975,75 @@ a:hover {
     box-shadow:
         0 1px 1px 0 rgba(0, 0, 0, 0.06),
         0 2px 5px 0 rgba(0, 0, 0, 0.16);
+    cursor: pointer;
+}
+
+.portfolio-slider {
+    position: relative;
+    overflow: hidden;
+}
+
+.portfolio-slide-track {
+    display: flex;
+    transition: transform 350ms ease;
 }
 
 .portfolio-thumb {
+    flex: 0 0 100%;
     width: 100%;
     height: 240px;
     object-fit: cover;
     display: block;
-    cursor: zoom-in;
+}
+
+.portfolio-slide-control {
+    position: absolute;
+    top: 50%;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.portfolio-slide-prev {
+    left: 0.75rem;
+}
+
+.portfolio-slide-next {
+    right: 0.75rem;
+}
+
+.portfolio-slide-control:hover,
+.portfolio-slide-control:focus {
+    background: rgba(0, 0, 0, 0.62);
+}
+
+.portfolio-slide-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.75rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.portfolio-slide-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.56);
+}
+
+.portfolio-slide-dots span.active {
+    background: #fff;
 }
 
 .portfolio-body {
@@ -1093,6 +1154,47 @@ a:hover {
 .image-overlay-close:hover,
 .image-overlay-close:focus {
     background: rgba(255, 255, 255, 0.26);
+}
+
+.image-overlay-nav {
+    position: absolute;
+    top: 50%;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.image-overlay-prev {
+    left: 1rem;
+}
+
+.image-overlay-next {
+    right: 1rem;
+}
+
+.image-overlay-nav:hover,
+.image-overlay-nav:focus {
+    background: rgba(255, 255, 255, 0.26);
+}
+
+.image-overlay-caption {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #fff;
+    text-align: center;
 }
 
 body.image-overlay-open {

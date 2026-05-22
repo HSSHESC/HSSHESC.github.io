@@ -200,26 +200,57 @@
     const portfolioItems = select("#portfolioItems");
     if (portfolioItems) {
         const portfolioData = window.ESC_CONTENT?.portfolio ?? [];
+        const getPortfolioImages = (item) =>
+            item.images?.length ? item.images : [item.image];
 
         portfolioItems.innerHTML = portfolioData
             .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map(
-                (item) => {
-                    const title = escapeHtml(item.title);
-                    const titleMarkup = item.href
-                        ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
-                        : title;
-
-                    return `
-                    <div class="col-lg-6">
-                        <div class="portfolio-item">
+            .map((item, itemIndex) => {
+                const images = getPortfolioImages(item);
+                const title = escapeHtml(item.title);
+                const titleMarkup = item.href
+                    ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
+                    : title;
+                const slides = images
+                    .map(
+                        (image) => `
                             <img
-                                src="${escapeHtml(item.image)}"
+                                src="${escapeHtml(image)}"
                                 alt="${title}"
-                                class="portfolio-thumb portfolio-zoom-image"
-                                role="button"
-                                tabindex="0"
+                                class="portfolio-thumb"
                             />
+                        `,
+                    )
+                    .join("");
+                const controls =
+                    images.length > 1
+                        ? `
+                            <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="이전 대표 이미지">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button class="portfolio-slide-control portfolio-slide-next" type="button" aria-label="다음 대표 이미지">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                            <div class="portfolio-slide-dots" aria-hidden="true">
+                                ${images.map((_, imageIndex) => `<span class="${imageIndex === 0 ? "active" : ""}"></span>`).join("")}
+                            </div>
+                        `
+                        : "";
+
+                return `
+                    <div class="col-lg-6">
+                        <article
+                            class="portfolio-item"
+                            data-portfolio-index="${itemIndex}"
+                            role="button"
+                            tabindex="0"
+                        >
+                            <div class="portfolio-slider" data-slide-index="0">
+                                <div class="portfolio-slide-track">
+                                    ${slides}
+                                </div>
+                                ${controls}
+                            </div>
                             <div class="portfolio-body">
                                 <div class="portfolio-icon">
                                     <i class="bi ${escapeHtml(item.icon)}"></i>
@@ -230,12 +261,158 @@
                                     <p class="portfolio-description">${escapeHtml(item.description)}</p>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     </div>
                 `;
-                },
-            )
+            })
             .join("");
+
+        const updateCardSlide = (slider, index) => {
+            const track = slider.querySelector(".portfolio-slide-track");
+            const slides = slider.querySelectorAll(".portfolio-thumb");
+            const dots = slider.querySelectorAll(".portfolio-slide-dots span");
+            const nextIndex = (index + slides.length) % slides.length;
+
+            slider.dataset.slideIndex = String(nextIndex);
+            track.style.transform = `translateX(-${nextIndex * 100}%)`;
+            dots.forEach((dot, dotIndex) => {
+                dot.classList.toggle("active", dotIndex === nextIndex);
+            });
+        };
+
+        select(".portfolio-slider", true).forEach((slider) => {
+            const slides = slider.querySelectorAll(".portfolio-thumb");
+            if (slides.length <= 1) return;
+
+            slider
+                .querySelector(".portfolio-slide-prev")
+                .addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    updateCardSlide(
+                        slider,
+                        Number(slider.dataset.slideIndex) - 1,
+                    );
+                });
+            slider
+                .querySelector(".portfolio-slide-next")
+                .addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    updateCardSlide(
+                        slider,
+                        Number(slider.dataset.slideIndex) + 1,
+                    );
+                });
+
+            window.setInterval(() => {
+                updateCardSlide(slider, Number(slider.dataset.slideIndex) + 1);
+            }, 3500);
+        });
+
+        const imageOverlay = select("#imageOverlay");
+        if (imageOverlay) {
+            const overlayImage = select(".image-overlay-img");
+            const overlayTitle = select(".image-overlay-title");
+            const overlayCount = select(".image-overlay-count");
+            const closeButton = select(".image-overlay-close");
+            const prevButton = select(".image-overlay-prev");
+            const nextButton = select(".image-overlay-next");
+            let currentImages = [];
+            let currentTitle = "";
+            let currentIndex = 0;
+
+            const updateOverlay = () => {
+                overlayImage.src = currentImages[currentIndex];
+                overlayImage.alt = currentTitle;
+                overlayTitle.textContent = currentTitle;
+                overlayCount.textContent =
+                    currentImages.length > 1
+                        ? `${currentIndex + 1} / ${currentImages.length}`
+                        : "";
+                prevButton.hidden = currentImages.length <= 1;
+                nextButton.hidden = currentImages.length <= 1;
+            };
+
+            const openOverlay = (item, startIndex = 0) => {
+                currentImages = getPortfolioImages(item);
+                currentTitle = item.title;
+                currentIndex = startIndex;
+                updateOverlay();
+                imageOverlay.classList.add("active");
+                imageOverlay.setAttribute("aria-hidden", "false");
+                document.body.classList.add("image-overlay-open");
+                closeButton.focus();
+            };
+
+            const closeOverlay = () => {
+                imageOverlay.classList.remove("active");
+                imageOverlay.setAttribute("aria-hidden", "true");
+                document.body.classList.remove("image-overlay-open");
+                overlayImage.src = "";
+                overlayImage.alt = "";
+            };
+
+            const showOverlayImage = (step) => {
+                currentIndex =
+                    (currentIndex + step + currentImages.length) %
+                    currentImages.length;
+                updateOverlay();
+            };
+
+            select(".portfolio-item", true).forEach((itemElement) => {
+                itemElement.addEventListener("click", (event) => {
+                    if (event.target.closest("a, button")) return;
+
+                    const item =
+                        portfolioData[
+                            Number(itemElement.dataset.portfolioIndex)
+                        ];
+                    const slider = itemElement.querySelector(".portfolio-slider");
+                    openOverlay(item, Number(slider.dataset.slideIndex));
+                });
+                itemElement.addEventListener("keydown", (event) => {
+                    if (event.target.closest("a, button")) return;
+
+                    if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        const item =
+                            portfolioData[
+                                Number(itemElement.dataset.portfolioIndex)
+                            ];
+                        const slider =
+                            itemElement.querySelector(".portfolio-slider");
+                        openOverlay(item, Number(slider.dataset.slideIndex));
+                    }
+                });
+            });
+
+            select(".portfolio-title-link", true).forEach((link) => {
+                link.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                });
+            });
+
+            closeButton.addEventListener("click", closeOverlay);
+            prevButton.addEventListener("click", () => showOverlayImage(-1));
+            nextButton.addEventListener("click", () => showOverlayImage(1));
+            imageOverlay.addEventListener("click", (event) => {
+                if (event.target === imageOverlay) {
+                    closeOverlay();
+                }
+            });
+            document.addEventListener("keydown", (event) => {
+                if (!imageOverlay.classList.contains("active")) return;
+
+                if (event.key === "Escape") {
+                    closeOverlay();
+                }
+                if (event.key === "ArrowLeft" && currentImages.length > 1) {
+                    showOverlayImage(-1);
+                }
+                if (event.key === "ArrowRight" && currentImages.length > 1) {
+                    showOverlayImage(1);
+                }
+            });
+        }
     }
 
     /**
@@ -272,58 +449,6 @@
                 `,
             )
             .join("");
-    }
-
-    /**
-     * Portfolio image overlay
-     */
-    const imageOverlay = select("#imageOverlay");
-    if (imageOverlay) {
-        const overlayImage = select(".image-overlay-img");
-        const closeButton = select(".image-overlay-close");
-        const zoomImages = select(".portfolio-zoom-image", true);
-
-        const openOverlay = (image) => {
-            overlayImage.src = image.src;
-            overlayImage.alt = image.alt;
-            imageOverlay.classList.add("active");
-            imageOverlay.setAttribute("aria-hidden", "false");
-            document.body.classList.add("image-overlay-open");
-            closeButton.focus();
-        };
-
-        const closeOverlay = () => {
-            imageOverlay.classList.remove("active");
-            imageOverlay.setAttribute("aria-hidden", "true");
-            document.body.classList.remove("image-overlay-open");
-            overlayImage.src = "";
-            overlayImage.alt = "";
-        };
-
-        zoomImages.forEach((image) => {
-            image.addEventListener("click", () => openOverlay(image));
-            image.addEventListener("keydown", (event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    openOverlay(image);
-                }
-            });
-        });
-
-        closeButton.addEventListener("click", closeOverlay);
-        imageOverlay.addEventListener("click", (event) => {
-            if (event.target === imageOverlay) {
-                closeOverlay();
-            }
-        });
-        document.addEventListener("keydown", (event) => {
-            if (
-                event.key === "Escape" &&
-                imageOverlay.classList.contains("active")
-            ) {
-                closeOverlay();
-            }
-        });
     }
 
     /**
