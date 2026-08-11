@@ -199,32 +199,126 @@
      */
     const portfolioItems = select("#portfolioItems");
     if (portfolioItems) {
-        const portfolioData = window.ESC_CONTENT?.portfolio ?? [];
-        const getPortfolioImages = (item) =>
-            item.images?.length ? item.images : [item.image];
+        const initializePortfolio = async () => {
+            const portfolioData = [
+                ...(window.ESC_CONTENT?.portfolio ?? []),
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const imageSource = window.ESC_CONTENT?.portfolioImageSource;
+            const imageFilePattern = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
+            const getPortfolioImages = (item) => item.images ?? [];
+            let imageLoadFailed = false;
 
-        portfolioItems.innerHTML = portfolioData
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map((item, itemIndex) => {
-                const images = getPortfolioImages(item);
-                const title = escapeHtml(item.title);
-                const titleMarkup = item.href
-                    ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
-                    : title;
-                const slides = images
-                    .map(
-                        (image) => `
+            const encodePath = (path) =>
+                path.split("/").map(encodeURIComponent).join("/");
+
+            const loadPortfolioImages = async () => {
+                if (!imageSource) {
+                    throw new Error(
+                        "Portfolio image source is not configured.",
+                    );
+                }
+
+                const repository = imageSource.repository
+                    .split("/")
+                    .map(encodeURIComponent)
+                    .join("/");
+                const branch = encodeURIComponent(imageSource.branch);
+                const directory = imageSource.directory.replace(
+                    /^\/+|\/+$/g,
+                    "",
+                );
+                const response = await fetch(
+                    `https://api.github.com/repos/${repository}/git/trees/${branch}?recursive=1`,
+                    {
+                        headers: {
+                            Accept: "application/vnd.github+json",
+                        },
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `GitHub image list request failed: ${response.status}`,
+                    );
+                }
+
+                const data = await response.json();
+                if (data.truncated) {
+                    throw new Error(
+                        "GitHub image list response was truncated.",
+                    );
+                }
+
+                const imagePaths = data.tree
+                    .filter(
+                        (entry) =>
+                            entry.type === "blob" &&
+                            imageFilePattern.test(entry.path),
+                    )
+                    .map((entry) => entry.path);
+
+                portfolioData.forEach((item) => {
+                    const folder = `${directory}/${item.date}/`;
+                    item.images = imagePaths
+                        .filter((path) => {
+                            const relativePath = path.slice(folder.length);
+                            return (
+                                path.startsWith(folder) &&
+                                relativePath &&
+                                !relativePath.includes("/")
+                            );
+                        })
+                        .sort((a, b) =>
+                            a.localeCompare(b, undefined, {
+                                numeric: true,
+                                sensitivity: "base",
+                            }),
+                        )
+                        .map(encodePath);
+                });
+            };
+
+            portfolioItems.innerHTML = `
+                <div class="col-12 py-5 text-center text-muted" role="status">
+                    포트폴리오 이미지를 불러오는 중입니다.
+                </div>
+            `;
+
+            try {
+                await loadPortfolioImages();
+            } catch (error) {
+                imageLoadFailed = true;
+                console.error(error);
+            }
+
+            portfolioItems.innerHTML = portfolioData
+                .map((item, itemIndex) => {
+                    const images = getPortfolioImages(item);
+                    const title = escapeHtml(item.title);
+                    const titleMarkup = item.href
+                        ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
+                        : title;
+                    const slides = images.length
+                        ? images
+                              .map(
+                                  (image) => `
                             <img
                                 src="${escapeHtml(image)}"
                                 alt="${title}"
                                 class="portfolio-thumb"
                             />
                         `,
-                    )
-                    .join("");
-                const controls =
-                    images.length > 1
-                        ? `
+                              )
+                              .join("")
+                        : `
+                        <div class="portfolio-image-empty">
+                            <i class="bi bi-image" aria-hidden="true"></i>
+                            <span>${imageLoadFailed ? "이미지를 불러오지 못했습니다." : "등록된 이미지가 없습니다."}</span>
+                        </div>
+                    `;
+                    const controls =
+                        images.length > 1
+                            ? `
                             <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="이전 대표 이미지">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
@@ -235,15 +329,15 @@
                                 ${images.map((_, imageIndex) => `<span class="${imageIndex === 0 ? "active" : ""}"></span>`).join("")}
                             </div>
                         `
-                        : "";
+                            : "";
 
-                return `
+                    return `
                     <div class="col-lg-6">
                         <article
                             class="portfolio-item"
                             data-portfolio-index="${itemIndex}"
-                            role="button"
-                            tabindex="0"
+                            data-has-images="${images.length > 0}"
+                            ${images.length ? 'role="button" tabindex="0"' : ""}
                         >
                             <div class="portfolio-slider" data-slide-index="0">
                                 <div class="portfolio-slide-track">
@@ -264,155 +358,181 @@
                         </article>
                     </div>
                 `;
-            })
-            .join("");
+                })
+                .join("");
 
-        const updateCardSlide = (slider, index) => {
-            const track = slider.querySelector(".portfolio-slide-track");
-            const slides = slider.querySelectorAll(".portfolio-thumb");
-            const dots = slider.querySelectorAll(".portfolio-slide-dots span");
-            const nextIndex = (index + slides.length) % slides.length;
+            const updateCardSlide = (slider, index) => {
+                const track = slider.querySelector(".portfolio-slide-track");
+                const slides = slider.querySelectorAll(".portfolio-thumb");
+                const dots = slider.querySelectorAll(
+                    ".portfolio-slide-dots span",
+                );
+                const nextIndex = (index + slides.length) % slides.length;
 
-            slider.dataset.slideIndex = String(nextIndex);
-            track.style.transform = `translateX(-${nextIndex * 100}%)`;
-            dots.forEach((dot, dotIndex) => {
-                dot.classList.toggle("active", dotIndex === nextIndex);
-            });
-        };
-
-        select(".portfolio-slider", true).forEach((slider) => {
-            const slides = slider.querySelectorAll(".portfolio-thumb");
-            if (slides.length <= 1) return;
-
-            slider
-                .querySelector(".portfolio-slide-prev")
-                .addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    updateCardSlide(
-                        slider,
-                        Number(slider.dataset.slideIndex) - 1,
-                    );
+                slider.dataset.slideIndex = String(nextIndex);
+                track.style.transform = `translateX(-${nextIndex * 100}%)`;
+                dots.forEach((dot, dotIndex) => {
+                    dot.classList.toggle("active", dotIndex === nextIndex);
                 });
-            slider
-                .querySelector(".portfolio-slide-next")
-                .addEventListener("click", (event) => {
-                    event.stopPropagation();
+            };
+
+            select(".portfolio-slider", true).forEach((slider) => {
+                const slides = slider.querySelectorAll(".portfolio-thumb");
+                if (slides.length <= 1) return;
+
+                slider
+                    .querySelector(".portfolio-slide-prev")
+                    .addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        updateCardSlide(
+                            slider,
+                            Number(slider.dataset.slideIndex) - 1,
+                        );
+                    });
+                slider
+                    .querySelector(".portfolio-slide-next")
+                    .addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        updateCardSlide(
+                            slider,
+                            Number(slider.dataset.slideIndex) + 1,
+                        );
+                    });
+
+                window.setInterval(() => {
                     updateCardSlide(
                         slider,
                         Number(slider.dataset.slideIndex) + 1,
                     );
+                }, 3500);
+            });
+
+            const imageOverlay = select("#imageOverlay");
+            if (imageOverlay) {
+                const overlayImage = select(".image-overlay-img");
+                const overlayTitle = select(".image-overlay-title");
+                const overlayCount = select(".image-overlay-count");
+                const closeButton = select(".image-overlay-close");
+                const prevButton = select(".image-overlay-prev");
+                const nextButton = select(".image-overlay-next");
+                let currentImages = [];
+                let currentTitle = "";
+                let currentIndex = 0;
+
+                const updateOverlay = () => {
+                    overlayImage.src = currentImages[currentIndex];
+                    overlayImage.alt = currentTitle;
+                    overlayTitle.textContent = currentTitle;
+                    overlayCount.textContent =
+                        currentImages.length > 1
+                            ? `${currentIndex + 1} / ${currentImages.length}`
+                            : "";
+                    prevButton.hidden = currentImages.length <= 1;
+                    nextButton.hidden = currentImages.length <= 1;
+                };
+
+                const openOverlay = (item, startIndex = 0) => {
+                    currentImages = getPortfolioImages(item);
+                    currentTitle = item.title;
+                    currentIndex = startIndex;
+                    updateOverlay();
+                    imageOverlay.classList.add("active");
+                    imageOverlay.setAttribute("aria-hidden", "false");
+                    document.body.classList.add("image-overlay-open");
+                    closeButton.focus();
+                };
+
+                const closeOverlay = () => {
+                    imageOverlay.classList.remove("active");
+                    imageOverlay.setAttribute("aria-hidden", "true");
+                    document.body.classList.remove("image-overlay-open");
+                    overlayImage.src = "";
+                    overlayImage.alt = "";
+                };
+
+                const showOverlayImage = (step) => {
+                    currentIndex =
+                        (currentIndex + step + currentImages.length) %
+                        currentImages.length;
+                    updateOverlay();
+                };
+
+                select('.portfolio-item[data-has-images="true"]', true).forEach(
+                    (itemElement) => {
+                        itemElement.addEventListener("click", (event) => {
+                            if (event.target.closest("a, button")) return;
+
+                            const item =
+                                portfolioData[
+                                    Number(itemElement.dataset.portfolioIndex)
+                                ];
+                            const slider =
+                                itemElement.querySelector(".portfolio-slider");
+                            openOverlay(
+                                item,
+                                Number(slider.dataset.slideIndex),
+                            );
+                        });
+                        itemElement.addEventListener("keydown", (event) => {
+                            if (event.target.closest("a, button")) return;
+
+                            if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                const item =
+                                    portfolioData[
+                                        Number(
+                                            itemElement.dataset.portfolioIndex,
+                                        )
+                                    ];
+                                const slider =
+                                    itemElement.querySelector(
+                                        ".portfolio-slider",
+                                    );
+                                openOverlay(
+                                    item,
+                                    Number(slider.dataset.slideIndex),
+                                );
+                            }
+                        });
+                    },
+                );
+
+                select(".portfolio-title-link", true).forEach((link) => {
+                    link.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                    });
                 });
 
-            window.setInterval(() => {
-                updateCardSlide(slider, Number(slider.dataset.slideIndex) + 1);
-            }, 3500);
-        });
-
-        const imageOverlay = select("#imageOverlay");
-        if (imageOverlay) {
-            const overlayImage = select(".image-overlay-img");
-            const overlayTitle = select(".image-overlay-title");
-            const overlayCount = select(".image-overlay-count");
-            const closeButton = select(".image-overlay-close");
-            const prevButton = select(".image-overlay-prev");
-            const nextButton = select(".image-overlay-next");
-            let currentImages = [];
-            let currentTitle = "";
-            let currentIndex = 0;
-
-            const updateOverlay = () => {
-                overlayImage.src = currentImages[currentIndex];
-                overlayImage.alt = currentTitle;
-                overlayTitle.textContent = currentTitle;
-                overlayCount.textContent =
-                    currentImages.length > 1
-                        ? `${currentIndex + 1} / ${currentImages.length}`
-                        : "";
-                prevButton.hidden = currentImages.length <= 1;
-                nextButton.hidden = currentImages.length <= 1;
-            };
-
-            const openOverlay = (item, startIndex = 0) => {
-                currentImages = getPortfolioImages(item);
-                currentTitle = item.title;
-                currentIndex = startIndex;
-                updateOverlay();
-                imageOverlay.classList.add("active");
-                imageOverlay.setAttribute("aria-hidden", "false");
-                document.body.classList.add("image-overlay-open");
-                closeButton.focus();
-            };
-
-            const closeOverlay = () => {
-                imageOverlay.classList.remove("active");
-                imageOverlay.setAttribute("aria-hidden", "true");
-                document.body.classList.remove("image-overlay-open");
-                overlayImage.src = "";
-                overlayImage.alt = "";
-            };
-
-            const showOverlayImage = (step) => {
-                currentIndex =
-                    (currentIndex + step + currentImages.length) %
-                    currentImages.length;
-                updateOverlay();
-            };
-
-            select(".portfolio-item", true).forEach((itemElement) => {
-                itemElement.addEventListener("click", (event) => {
-                    if (event.target.closest("a, button")) return;
-
-                    const item =
-                        portfolioData[
-                            Number(itemElement.dataset.portfolioIndex)
-                        ];
-                    const slider = itemElement.querySelector(".portfolio-slider");
-                    openOverlay(item, Number(slider.dataset.slideIndex));
-                });
-                itemElement.addEventListener("keydown", (event) => {
-                    if (event.target.closest("a, button")) return;
-
-                    if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        const item =
-                            portfolioData[
-                                Number(itemElement.dataset.portfolioIndex)
-                            ];
-                        const slider =
-                            itemElement.querySelector(".portfolio-slider");
-                        openOverlay(item, Number(slider.dataset.slideIndex));
+                closeButton.addEventListener("click", closeOverlay);
+                prevButton.addEventListener("click", () =>
+                    showOverlayImage(-1),
+                );
+                nextButton.addEventListener("click", () => showOverlayImage(1));
+                imageOverlay.addEventListener("click", (event) => {
+                    if (event.target === imageOverlay) {
+                        closeOverlay();
                     }
                 });
-            });
+                document.addEventListener("keydown", (event) => {
+                    if (!imageOverlay.classList.contains("active")) return;
 
-            select(".portfolio-title-link", true).forEach((link) => {
-                link.addEventListener("click", (event) => {
-                    event.stopPropagation();
+                    if (event.key === "Escape") {
+                        closeOverlay();
+                    }
+                    if (event.key === "ArrowLeft" && currentImages.length > 1) {
+                        showOverlayImage(-1);
+                    }
+                    if (
+                        event.key === "ArrowRight" &&
+                        currentImages.length > 1
+                    ) {
+                        showOverlayImage(1);
+                    }
                 });
-            });
+            }
+        };
 
-            closeButton.addEventListener("click", closeOverlay);
-            prevButton.addEventListener("click", () => showOverlayImage(-1));
-            nextButton.addEventListener("click", () => showOverlayImage(1));
-            imageOverlay.addEventListener("click", (event) => {
-                if (event.target === imageOverlay) {
-                    closeOverlay();
-                }
-            });
-            document.addEventListener("keydown", (event) => {
-                if (!imageOverlay.classList.contains("active")) return;
-
-                if (event.key === "Escape") {
-                    closeOverlay();
-                }
-                if (event.key === "ArrowLeft" && currentImages.length > 1) {
-                    showOverlayImage(-1);
-                }
-                if (event.key === "ArrowRight" && currentImages.length > 1) {
-                    showOverlayImage(1);
-                }
-            });
-        }
+        initializePortfolio();
     }
 
     /**

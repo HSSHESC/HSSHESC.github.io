@@ -978,6 +978,10 @@ a:hover {
     cursor: pointer;
 }
 
+.portfolio-item[data-has-images="false"] {
+    cursor: default;
+}
+
 .portfolio-slider {
     position: relative;
     overflow: hidden;
@@ -994,6 +998,24 @@ a:hover {
     height: 240px;
     object-fit: cover;
     display: block;
+}
+
+.portfolio-image-empty {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 240px;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.portfolio-image-empty i {
+    color: var(--secondary);
+    font-size: 2rem;
 }
 
 .portfolio-slide-control {
@@ -1091,7 +1113,8 @@ a:hover {
 }
 
 @media (max-width: 767px) {
-    .portfolio-thumb {
+    .portfolio-thumb,
+    .portfolio-image-empty {
         height: 190px;
     }
 
