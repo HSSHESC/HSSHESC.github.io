@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -21,7 +21,6 @@
         <link href="assets/css/style.css" rel="stylesheet" />
         <link
             rel="stylesheet"
-            as="style"
             crossorigin
             href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
         />
@@ -32,30 +31,49 @@
             <div
                 class="container d-flex align-items-center justify-content-between"
             >
-                <h1 class="logo"><a href="..">ESC</a></h1>
+                <h1 class="logo">
+                    <a href="index.html" id="siteBrand">ESC</a>
+                </h1>
 
                 <nav id="navbar" class="navbar">
                     <ul>
                         <li>
-                            <a class="nav-link scrollto active" href="#hero"
+                            <a
+                                class="nav-link scrollto active"
+                                href="#hero"
+                                id="navHome"
                                 >Home</a
                             >
                         </li>
                         <li>
-                            <a class="nav-link scrollto" href="#about">About</a>
+                            <a
+                                class="nav-link scrollto"
+                                href="#about"
+                                id="navAbout"
+                                >About</a
+                            >
                         </li>
                         <li>
-                            <a class="nav-link scrollto" href="#services"
+                            <a
+                                class="nav-link scrollto"
+                                href="#services"
+                                id="navActivities"
                                 >Activities</a
                             >
                         </li>
                         <li>
-                            <a class="nav-link scrollto" href="#portfolio"
+                            <a
+                                class="nav-link scrollto"
+                                href="#portfolio"
+                                id="navPortfolio"
                                 >Portfolio</a
                             >
                         </li>
                         <li>
-                            <a class="nav-link scrollto" href="#contact"
+                            <a
+                                class="nav-link scrollto"
+                                href="#contact"
+                                id="navContact"
                                 >Contact</a
                             >
                         </li>
@@ -70,7 +88,7 @@
             <div class="hero-content display-table">
                 <div class="table-cell">
                     <div class="container">
-                        <h1 class="hero-title mb-4">ESC</h1>
+                        <h1 class="hero-title mb-4" id="heroTitle">ESC</h1>
                         <p class="hero-subtitle">
                             <span
                                 class="typed"
@@ -99,36 +117,47 @@
                                     <div class="col-md-10">
                                         <div class="about-me pt-4 pt-md-0">
                                             <div class="title-box-2">
-                                                <h5 class="title-left">
+                                                <h5
+                                                    class="title-left"
+                                                    id="aboutTitle"
+                                                >
                                                     동아리 소개
                                                 </h5>
                                             </div>
-                                            <p class="lead">
-                                                안녕하세요! 저희는
-                                                <a
-                                                    class="school-link"
-                                                    href="https://hansungsh.sen.hs.kr/"
-                                                    >한성과학고등학교</a
-                                                >의 정보공학 동아리 ESC입니다.
-                                            </p>
-                                            <p class="lead">
-                                                동아리 이름 ESC는
-                                                <span
-                                                    style="
-                                                        font-weight: bold;
-                                                        color: var(--secondary);
-                                                    "
-                                                    >Engineering Science of
-                                                    Computer</span
-                                                >라는 의미입니다.
-                                            </p>
-                                            <p class="lead">
-                                                ESC에서는 정보공학과 관련된
-                                                다양한 활동을 진행합니다.<br />
-                                                2026학년도에 계획된 활동은
-                                                다음과 같습니다.
-                                            </p>
-                                            <ul class="lead">
+                                            <div id="aboutParagraphs">
+                                                <p class="lead">
+                                                    안녕하세요! 저희는
+                                                    <a
+                                                        class="school-link"
+                                                        href="https://hansungsh.sen.hs.kr/"
+                                                        >한성과학고등학교</a
+                                                    >의 정보공학 동아리
+                                                    ESC입니다.
+                                                </p>
+                                                <p class="lead">
+                                                    동아리 이름 ESC는
+                                                    <span
+                                                        style="
+                                                            font-weight: bold;
+                                                            color: var(
+                                                                --secondary
+                                                            );
+                                                        "
+                                                        >Engineering Science of
+                                                        Computer</span
+                                                    >라는 의미입니다.
+                                                </p>
+                                                <p class="lead">
+                                                    ESC에서는 정보공학과 관련된
+                                                    다양한 활동을 진행합니다.<br />
+                                                    2026학년도에 계획된 활동은
+                                                    다음과 같습니다.
+                                                </p>
+                                            </div>
+                                            <ul
+                                                class="lead"
+                                                id="aboutPlanItems"
+                                            >
                                                 <li>
                                                     실생활이나 연구 과정에서
                                                     활용 가능한
@@ -170,15 +199,17 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="title-box text-center">
-                                <h3 class="title-a">활동 계획</h3>
-                                <p class="subtitle-a">
+                                <h3 class="title-a" id="servicesTitle">
+                                    활동 계획
+                                </h3>
+                                <p class="subtitle-a" id="servicesSubtitle">
                                     2026학년도 ESC에서 진행할 동아리 활동입니다.
                                 </p>
                                 <div class="line-mf"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" id="serviceItems">
                         <div class="col-md-4">
                             <div class="service-box">
                                 <div class="service-ico">
@@ -323,10 +354,12 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="title-box text-center">
-                                <h3 class="title-a">포트폴리오</h3>
+                                <h3 class="title-a" id="portfolioTitle">
+                                    포트폴리오
+                                </h3>
                                 <div class="line-mf"></div>
                             </div>
-                            <!-- Portfolio cards are rendered from assets/js/content.js. -->
+                            <!-- Portfolio cards are rendered from Supabase, with local fallback data. -->
                             <div class="row g-4" id="portfolioItems"></div>
                         </div>
                     </div>
@@ -348,10 +381,15 @@
                                 <div class="box-shadow-full">
                                     <div class="row">
                                         <div class="title-box-2 pt-4 pt-md-0">
-                                            <h5 class="title-left">Contact</h5>
+                                            <h5
+                                                class="title-left"
+                                                id="contactTitle"
+                                            >
+                                                Contact
+                                            </h5>
                                         </div>
                                         <div class="more-info">
-                                            <p class="lead">
+                                            <p class="lead" id="contactIntro">
                                                 더 궁금한 사항이 있다면 아래
                                                 연락처를 통해 문의해 주세요.
                                             </p>
@@ -384,7 +422,10 @@
                             <p class="copyright">
                                 &copy;
                                 <span class="copyright-year"></span> Copyright
-                                <strong>ESC</strong>. All Rights Reserved.
+                                <strong id="footerCopyrightName">ESC</strong>.
+                                <span id="footerRights"
+                                    >All Rights Reserved.</span
+                                >
                             </p>
                             <div class="credits">
                                 <!--
@@ -398,6 +439,11 @@
                                     HSSH 34th Dongha Lee</a
                                 >
                             </div>
+                            <div class="footer-admin-link">
+                                <a href="admin.html" id="footerAdminLabel"
+                                    >관리자</a
+                                >
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -407,11 +453,12 @@
 
         <a
             href="#"
+            aria-label="맨 위로 이동"
             class="back-to-top d-flex align-items-center justify-content-center"
             ><i class="bi bi-arrow-up-short"></i
         ></a>
 
-        <div class="image-overlay" id="imageOverlay" aria-hidden="true">
+        <div class="image-overlay" id="imageOverlay" aria-hidden="true" inert>
             <button
                 class="image-overlay-close"
                 type="button"
@@ -426,7 +473,7 @@
             >
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <img src="" alt="" class="image-overlay-img" />
+            <img alt="" class="image-overlay-img" />
             <button
                 class="image-overlay-nav image-overlay-next"
                 type="button"
@@ -436,6 +483,7 @@
             </button>
             <div class="image-overlay-caption">
                 <strong class="image-overlay-title"></strong>
+                <span class="image-overlay-description"></span>
                 <span class="image-overlay-count"></span>
             </div>
         </div>
@@ -443,9 +491,14 @@
         <!-- Vendor JS Files -->
         <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="assets/vendor/typed.js/typed.min.js"></script>
+        <script src="assets/vendor/supabase/supabase.js"></script>
 
         <!-- Template Main JS File -->
+        <script src="assets/js/supabase-config.js"></script>
+        <script src="assets/js/supabase-client.js"></script>
         <script src="assets/js/content.js"></script>
+        <script src="assets/js/site-content.js"></script>
+        <script src="assets/js/activities.js"></script>
         <script src="assets/js/main.js"></script>
     </body>
 </html>
