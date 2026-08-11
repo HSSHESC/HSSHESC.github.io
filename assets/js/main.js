@@ -3,8 +3,12 @@
  * Author: BootstrapMade.com
  * License: https://bootstrapmade.com/license/
  */
-(function () {
+(async function () {
     "use strict";
+
+    if (window.ESC_SITE_CONTENT_READY) {
+        await window.ESC_SITE_CONTENT_READY;
+    }
 
     /**
      * Easy selector helper function
@@ -18,6 +22,15 @@
         }
     };
 
+    const onWindowLoad = (callback) => {
+        if (document.readyState === "complete") {
+            callback();
+            return;
+        }
+
+        window.addEventListener("load", callback, { once: true });
+    };
+
     const escapeHtml = (value) =>
         String(value)
             .replace(/&/g, "&amp;")
@@ -25,6 +38,17 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+
+    const getSafeUrl = (value, allowedProtocols = ["https:"]) => {
+        if (!value) return "";
+
+        try {
+            const url = new URL(value, window.location.href);
+            return allowedProtocols.includes(url.protocol) ? url.href : "";
+        } catch {
+            return "";
+        }
+    };
 
     /**
      * Easy event listener function
@@ -67,7 +91,7 @@
             }
         });
     };
-    window.addEventListener("load", navbarlinksActive);
+    onWindowLoad(navbarlinksActive);
     onscroll(document, navbarlinksActive);
 
     /**
@@ -100,7 +124,7 @@
                 selectHeader.classList.remove("header-scrolled");
             }
         };
-        window.addEventListener("load", headerScrolled);
+        onWindowLoad(headerScrolled);
         onscroll(document, headerScrolled);
     }
 
@@ -116,7 +140,7 @@
                 backtotop.classList.remove("active");
             }
         };
-        window.addEventListener("load", toggleBacktotop);
+        onWindowLoad(toggleBacktotop);
         onscroll(document, toggleBacktotop);
     }
 
@@ -170,7 +194,7 @@
     /**
      * Scroll with ofset on page load with hash links in the url
      */
-    window.addEventListener("load", () => {
+    onWindowLoad(() => {
         if (window.location.hash) {
             if (select(window.location.hash)) {
                 scrollto(window.location.hash);
@@ -200,12 +224,15 @@
     const portfolioItems = select("#portfolioItems");
     if (portfolioItems) {
         const initializePortfolio = async () => {
-            const portfolioData = [
-                ...(window.ESC_CONTENT?.portfolio ?? []),
-            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+            let portfolioData = [...(window.ESC_CONTENT?.portfolio ?? [])].sort(
+                (a, b) => new Date(b.date) - new Date(a.date),
+            );
             const imageSource = window.ESC_CONTENT?.portfolioImageSource;
             const imageFilePattern = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
             const getPortfolioImages = (item) => item.images ?? [];
+            const getPortfolioImageCaptions = (item) =>
+                item.imageCaptions ??
+                getPortfolioImages(item).map(() => item.title);
             let imageLoadFailed = false;
 
             const encodePath = (path) =>
@@ -280,31 +307,46 @@
 
             portfolioItems.innerHTML = `
                 <div class="col-12 py-5 text-center text-muted" role="status">
-                    포트폴리오 이미지를 불러오는 중입니다.
+                    활동 기록을 불러오는 중입니다.
                 </div>
             `;
 
             try {
-                await loadPortfolioImages();
+                if (!window.ESC_ACTIVITIES?.loadPublished) {
+                    throw new Error("Supabase activity loader is unavailable.");
+                }
+
+                portfolioData = await window.ESC_ACTIVITIES.loadPublished();
             } catch (error) {
-                imageLoadFailed = true;
-                console.error(error);
+                console.error(
+                    "Supabase 활동 데이터를 불러오지 못해 저장소 데이터를 사용합니다.",
+                    error,
+                );
+
+                try {
+                    await loadPortfolioImages();
+                } catch (fallbackError) {
+                    imageLoadFailed = true;
+                    console.error(fallbackError);
+                }
             }
 
             portfolioItems.innerHTML = portfolioData
                 .map((item, itemIndex) => {
                     const images = getPortfolioImages(item);
+                    const imageCaptions = getPortfolioImageCaptions(item);
                     const title = escapeHtml(item.title);
-                    const titleMarkup = item.href
-                        ? `<a class="portfolio-title-link" href="${escapeHtml(item.href)}">${title}</a>`
+                    const itemUrl = getSafeUrl(item.href, ["http:", "https:"]);
+                    const titleMarkup = itemUrl
+                        ? `<a class="portfolio-title-link" href="${escapeHtml(itemUrl)}" rel="noopener noreferrer">${title}</a>`
                         : title;
                     const slides = images.length
                         ? images
                               .map(
-                                  (image) => `
+                                  (image, imageIndex) => `
                             <img
                                 src="${escapeHtml(image)}"
-                                alt="${title}"
+                                alt="${escapeHtml(imageCaptions[imageIndex] ?? item.title)}"
                                 class="portfolio-thumb"
                             />
                         `,
@@ -411,18 +453,23 @@
             if (imageOverlay) {
                 const overlayImage = select(".image-overlay-img");
                 const overlayTitle = select(".image-overlay-title");
+                const overlayDescription = select(".image-overlay-description");
                 const overlayCount = select(".image-overlay-count");
                 const closeButton = select(".image-overlay-close");
                 const prevButton = select(".image-overlay-prev");
                 const nextButton = select(".image-overlay-next");
                 let currentImages = [];
+                let currentCaptions = [];
                 let currentTitle = "";
                 let currentIndex = 0;
 
                 const updateOverlay = () => {
                     overlayImage.src = currentImages[currentIndex];
-                    overlayImage.alt = currentTitle;
+                    overlayImage.alt =
+                        currentCaptions[currentIndex] || currentTitle;
                     overlayTitle.textContent = currentTitle;
+                    overlayDescription.textContent =
+                        currentCaptions[currentIndex] || "";
                     overlayCount.textContent =
                         currentImages.length > 1
                             ? `${currentIndex + 1} / ${currentImages.length}`
@@ -433,11 +480,13 @@
 
                 const openOverlay = (item, startIndex = 0) => {
                     currentImages = getPortfolioImages(item);
+                    currentCaptions = getPortfolioImageCaptions(item);
                     currentTitle = item.title;
                     currentIndex = startIndex;
                     updateOverlay();
                     imageOverlay.classList.add("active");
                     imageOverlay.setAttribute("aria-hidden", "false");
+                    imageOverlay.inert = false;
                     document.body.classList.add("image-overlay-open");
                     closeButton.focus();
                 };
@@ -445,6 +494,7 @@
                 const closeOverlay = () => {
                     imageOverlay.classList.remove("active");
                     imageOverlay.setAttribute("aria-hidden", "true");
+                    imageOverlay.inert = true;
                     document.body.classList.remove("image-overlay-open");
                     overlayImage.src = "";
                     overlayImage.alt = "";
@@ -542,33 +592,52 @@
     const contactSocials = select("#contactSocials");
     const contactData = window.ESC_CONTENT?.contacts ?? [];
     if (contactList) {
-        contactList.innerHTML = contactData
-            .map(
-                (item) => `
-                    <li>
-                        <span class="bi ${escapeHtml(item.icon)}"></span>
-                        ${escapeHtml(item.label)}:
-                        <a href="${escapeHtml(item.href)}">${escapeHtml(item.text)}</a>
-                    </li>
-                `,
-            )
-            .join("");
+        contactList.replaceChildren();
+        contactData.forEach((item) => {
+            const href = getSafeUrl(item.href, ["http:", "https:", "mailto:"]);
+            if (!href) return;
+
+            const row = document.createElement("li");
+            const icon = document.createElement("span");
+            icon.className = `bi ${/^bi-[a-z0-9-]+$/.test(item.icon) ? item.icon : "bi-link-45deg"}`;
+            const label = document.createTextNode(`${item.label}: `);
+            const link = document.createElement("a");
+            link.href = href;
+            link.textContent = item.text;
+            row.append(icon, label, link);
+            contactList.append(row);
+        });
     }
     if (contactSocials) {
-        contactSocials.innerHTML = contactData
+        contactSocials.replaceChildren();
+        contactData
             .filter((item) => item.social)
-            .map(
-                (item) => `
-                    <li>
-                        <a href="${escapeHtml(item.href)}" aria-label="${escapeHtml(item.label)}">
-                            <span class="ico-circle">
-                                <i class="bi ${escapeHtml(item.socialIcon ?? item.icon)}"></i>
-                            </span>
-                        </a>
-                    </li>
-                `,
-            )
-            .join("");
+            .forEach((item) => {
+                const href = getSafeUrl(item.href, [
+                    "http:",
+                    "https:",
+                    "mailto:",
+                ]);
+                if (!href) return;
+
+                const row = document.createElement("li");
+                const link = document.createElement("a");
+                link.href = href;
+                link.setAttribute("aria-label", item.label);
+                const circle = document.createElement("span");
+                circle.className = "ico-circle";
+                const icon = document.createElement("i");
+                const iconName = item.social_icon ?? item.icon;
+                icon.className = `bi ${
+                    /^bi-[a-z0-9-]+$/.test(iconName)
+                        ? iconName
+                        : "bi-link-45deg"
+                }`;
+                circle.append(icon);
+                link.append(circle);
+                row.append(link);
+                contactSocials.append(row);
+            });
     }
 
     /**
@@ -584,8 +653,6 @@
      */
     let preloader = select("#preloader");
     if (preloader) {
-        window.addEventListener("load", () => {
-            preloader.remove();
-        });
+        onWindowLoad(() => preloader.remove());
     }
 })();
