@@ -119,13 +119,13 @@ runBrowserScript("assets/js/activities.js");
     siteContent.content.appearance.contact_overlay_color,
     /^#[0-9a-f]{6}$/i,
   );
-  assert.ok(
-    siteContent.content.branding.club_logo_storage_path === null ||
-      typeof siteContent.content.branding.club_logo_storage_path === "string",
+  assert.equal(
+    siteContent.content.branding.club_logo_storage_path,
+    "branding/club-logo.png",
   );
-  assert.ok(
-    siteContent.content.branding.school_logo_storage_path === null ||
-      typeof siteContent.content.branding.school_logo_storage_path === "string",
+  assert.equal(
+    siteContent.content.branding.school_logo_storage_path,
+    "branding/school-logo.jpg",
   );
 
   assert.ok(photoRows.length > 0);

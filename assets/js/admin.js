@@ -836,8 +836,8 @@
     } else if (!state.removeLogos[kind]) {
       previewUrl =
         kind === "club"
-          ? "assets/img/esc-logo.png"
-          : "assets/img/hssh-logo.jpg";
+          ? getPublicAssetUrl("branding/club-logo.png")
+          : getPublicAssetUrl("branding/school-logo.jpg");
     }
 
     if (previewUrl) {

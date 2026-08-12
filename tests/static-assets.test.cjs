@@ -142,5 +142,19 @@ const currentSiteSources = [
 assert.ok(!/assets\/img\/20\d{2}-\d{2}-\d{2}\//.test(currentSiteSources));
 assert.ok(!currentSiteSources.includes("esc-banner-logo.png"));
 assert.ok(!currentSiteSources.includes("esc-logo-icon.png"));
+assert.ok(!currentSiteSources.includes("assets/img/esc-logo.png"));
+assert.ok(!currentSiteSources.includes("assets/img/hssh-logo.jpg"));
+assert.ok(!fs.existsSync(path.join(projectRoot, "assets/img/esc-logo.png")));
+assert.ok(!fs.existsSync(path.join(projectRoot, "assets/img/hssh-logo.jpg")));
+assert.ok(
+  currentSiteSources.includes(
+    "https://cpjiqlrjxchjipceiyus.supabase.co/storage/v1/object/public/site-assets/branding/club-logo.png",
+  ),
+);
+assert.ok(
+  currentSiteSources.includes(
+    "https://cpjiqlrjxchjipceiyus.supabase.co/storage/v1/object/public/site-assets/branding/school-logo.jpg",
+  ),
+);
 
 console.log("Static asset references and script ordering checks passed.");
