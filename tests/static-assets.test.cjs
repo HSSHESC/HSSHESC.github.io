@@ -99,6 +99,17 @@ assert.equal(
 );
 assert.ok(!extractFooter(faqHtml)?.includes('class="footer-admin-link"'));
 assert.ok(extractFooter(indexHtml)?.includes('class="footer-admin-link"'));
+const fixedCreatorCredit =
+  'Developed &amp; Designed by\n                <a href="https://github.com/meozigoon"> HSSH 34th Dongha Lee</a>';
+assert.ok(extractFooter(indexHtml)?.includes(fixedCreatorCredit));
+assert.ok(extractFooter(faqHtml)?.includes(fixedCreatorCredit));
+const adminScript = read("assets/js/admin.js");
+const siteContentScript = read("assets/js/site-content.js");
+assert.ok(!adminHtml.includes("Dongha Lee"));
+assert.ok(!adminScript.includes("Dongha Lee"));
+assert.ok(!siteContentScript.includes("Dongha Lee"));
+assert.ok(!adminScript.includes(".credits"));
+assert.ok(!siteContentScript.includes(".credits"));
 assert.ok(!faqHtml.includes('id="languageSwitch"'));
 assert.ok(!faqHtml.includes("assets/js/i18n.js"));
 assert.ok(!faqHtml.includes('hreflang="en"'));
