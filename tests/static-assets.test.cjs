@@ -6,7 +6,7 @@ const projectRoot = path.resolve(__dirname, "..");
 const read = (relativePath) =>
   fs.readFileSync(path.join(projectRoot, relativePath), "utf8");
 
-const htmlFiles = ["index.html", "admin.html", "faq.html"];
+const htmlFiles = ["index.html", "admin.html", "account.html", "faq.html"];
 const missing = [];
 
 htmlFiles.forEach((relativePath) => {
@@ -81,6 +81,26 @@ assert.ok(adminHtml.includes('id="toolsAdminView"'));
 assert.ok(adminHtml.includes('id="faqAdminItems"'));
 assert.ok(adminHtml.includes('id="revisionList"'));
 assert.ok(adminHtml.includes('id="adminStats"'));
+assert.ok(adminHtml.includes('id="adminEmail"'));
+assert.ok(adminHtml.includes('href="account.html"'));
+
+const accountHtml = read("account.html");
+assert.ok(accountHtml.includes('id="currentPassword"'));
+assert.ok(accountHtml.includes('id="newPassword"'));
+assert.ok(accountHtml.includes('id="newPasswordConfirm"'));
+assert.ok(accountHtml.includes('id="passwordStrengthMeter"'));
+assert.ok(accountHtml.includes('role="progressbar"'));
+assert.ok(accountHtml.includes("assets/js/password-strength.js"));
+assert.ok(accountHtml.includes("assets/js/account.js"));
+assert.ok(
+  accountHtml.indexOf("assets/js/password-strength.js") <
+    accountHtml.indexOf("assets/js/account.js"),
+);
+const accountScript = read("assets/js/account.js");
+assert.ok(accountScript.includes("signInWithPassword"));
+assert.ok(accountScript.includes("updateUser"));
+assert.ok(accountScript.includes("current_password"));
+assert.ok(accountScript.includes('from("site_admins")'));
 
 const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));

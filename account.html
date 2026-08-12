@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="noindex, nofollow" name="robots" />
+
+    <title>ESC 관리자 계정 관리</title>
+    <link
+      href="assets/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="assets/vendor/bootstrap-icons/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <link href="assets/css/admin.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+  </head>
+
+  <body class="admin-page">
+    <a class="skip-link" href="#accountMain">계정 관리로 바로가기</a>
+    <header class="admin-topbar">
+      <div
+        class="container d-flex align-items-center justify-content-between gap-3"
+      >
+        <a class="admin-brand" href="admin.html">
+          <span class="admin-brand-mark" aria-hidden="true">
+            <i class="bi bi-gear-wide-connected"></i>
+          </span>
+          <span>ESC 홈페이지 관리자</span>
+        </a>
+        <div class="admin-account-actions">
+          <span id="accountEmail" hidden></span>
+          <a class="btn btn-sm btn-outline-light" href="admin.html">
+            <i class="bi bi-arrow-left"></i>
+            관리자 페이지
+          </a>
+          <button
+            class="btn btn-sm btn-light"
+            id="accountLogoutButton"
+            type="button"
+            hidden
+          >
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container admin-main" id="accountMain">
+      <noscript>
+        <div class="alert alert-danger">
+          계정 관리 화면을 사용하려면 JavaScript를 활성화해야 합니다.
+        </div>
+      </noscript>
+
+      <div
+        class="alert admin-message"
+        id="accountMessage"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+
+      <section class="admin-login-card" id="accountLoadingSection">
+        <div class="admin-card-heading mb-0">
+          <span class="admin-heading-icon" aria-hidden="true">
+            <i class="bi bi-shield-check"></i>
+          </span>
+          <div>
+            <h1>계정 확인 중</h1>
+            <p>관리자 로그인 상태와 권한을 확인하고 있습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="admin-panel account-management-card"
+        id="accountSection"
+        hidden
+      >
+        <div class="admin-card-heading">
+          <span class="admin-heading-icon" aria-hidden="true">
+            <i class="bi bi-key"></i>
+          </span>
+          <div>
+            <h1>계정 관리</h1>
+            <p>현재 비밀번호를 확인한 뒤 새 비밀번호로 변경합니다.</p>
+          </div>
+        </div>
+
+        <p class="account-email-summary">
+          로그인 계정: <strong id="accountEmailSummary"></strong>
+        </p>
+
+        <form id="passwordChangeForm">
+          <div class="mb-3">
+            <label class="form-label" for="currentPassword">
+              기존 비밀번호
+            </label>
+            <input
+              class="form-control"
+              id="currentPassword"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="newPassword">새 비밀번호</label>
+            <input
+              class="form-control"
+              id="newPassword"
+              type="password"
+              autocomplete="new-password"
+              aria-describedby="passwordStrengthNote"
+              required
+            />
+            <div class="password-strength">
+              <div class="password-strength-heading">
+                <span>비밀번호 보안 강도</span>
+                <strong id="passwordStrengthLabel" aria-live="polite">
+                  입력 전
+                </strong>
+              </div>
+              <div
+                class="password-strength-meter"
+                id="passwordStrengthMeter"
+                role="progressbar"
+                aria-label="비밀번호 보안 강도"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-valuetext="입력 전"
+              >
+                <div
+                  class="password-strength-bar"
+                  id="passwordStrengthBar"
+                ></div>
+              </div>
+              <p class="password-strength-note" id="passwordStrengthNote">
+                이 표시는 안내용입니다. Weak 또는 Medium 비밀번호도 변경할 수
+                있습니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="newPasswordConfirm">
+              새 비밀번호 확인
+            </label>
+            <input
+              class="form-control"
+              id="newPasswordConfirm"
+              type="password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="account-form-actions">
+            <button
+              class="btn admin-primary-button"
+              id="changePasswordButton"
+              type="submit"
+            >
+              비밀번호 변경
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="assets/vendor/supabase/supabase.js"></script>
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    <script src="assets/js/password-strength.js"></script>
+    <script src="assets/js/account.js"></script>
+  </body>
+</html>

@@ -9,10 +9,13 @@
 ```text
 index.html                         공개 홈페이지
 admin.html                         관리자 로그인 및 홈페이지 관리 화면
+account.html                       관리자 계정 및 비밀번호 관리 화면
 assets/css/style.css               공개 홈페이지 디자인
 assets/css/admin.css               관리자 화면 디자인
 assets/js/activities.js            공개 활동 데이터 조회
 assets/js/admin.js                 관리자 로그인, 활동·사진·페이지 문구 CRUD
+assets/js/account.js               관리자 권한 확인 및 비밀번호 변경
+assets/js/password-strength.js     비밀번호 보안 강도 안내 척도
 assets/js/markdown.js              사용자 입력 Markdown의 안전한 렌더링
 assets/js/supabase-config.js       공개 가능한 Supabase 접속 설정
 assets/js/supabase-client.js       Supabase 브라우저 클라이언트
@@ -90,6 +93,9 @@ on conflict (user_id) do nothing;
 ```
 
 3. `admin.html`에서 같은 이메일과 비밀번호로 로그인합니다.
+4. 로그인 후 상단의 계정 이메일을 누르면 `account.html`에서 기존 비밀번호를
+   확인한 뒤 새 비밀번호로 변경할 수 있습니다. 보안 강도 표시는 안내용이며
+   Weak 또는 Medium이어도 클라이언트에서 변경을 막지 않습니다.
 
 관리자 권한을 취소하려면 다음 SQL을 사용합니다.
 
@@ -186,12 +192,16 @@ node --check .\assets\js\supabase-client.js
 node --check .\assets\js\site-content.js
 node --check .\assets\js\activities.js
 node --check .\assets\js\admin.js
+node --check .\assets\js\account.js
+node --check .\assets\js\password-strength.js
 node --check .\assets\js\main.js
 node --check .\assets\js\public-features.js
 node --check .\assets\js\admin-features.js
 node .\tests\markdown.test.cjs
 node .\tests\year.test.cjs
 node .\tests\static-assets.test.cjs
+node .\tests\password-strength.test.cjs
+node .\tests\account.test.cjs
 node .\tests\supabase-public.test.cjs
 ```
 
