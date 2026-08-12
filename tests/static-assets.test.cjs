@@ -1,0 +1,67 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const projectRoot = path.resolve(__dirname, "..");
+const read = (relativePath) =>
+  fs.readFileSync(path.join(projectRoot, relativePath), "utf8");
+
+const htmlFiles = ["index.html", "admin.html"];
+const missing = [];
+
+htmlFiles.forEach((relativePath) => {
+  const source = read(relativePath);
+  for (const match of source.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
+    const reference = match[1];
+    if (/^(?:https?:|mailto:|#|data:)/i.test(reference)) {
+      continue;
+    }
+    const target = reference.split(/[?#]/, 1)[0];
+    if (!fs.existsSync(path.resolve(projectRoot, target))) {
+      missing.push(`${relativePath}: ${reference}`);
+    }
+  }
+});
+
+["assets/css/style.css", "assets/css/admin.css"].forEach((relativePath) => {
+  const source = read(relativePath);
+  for (const match of source.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
+    const reference = match[1];
+    if (/^(?:https?:|data:)/i.test(reference)) {
+      continue;
+    }
+    const target = path.resolve(
+      projectRoot,
+      path.dirname(relativePath),
+      reference,
+    );
+    if (!fs.existsSync(target)) {
+      missing.push(`${relativePath}: ${reference}`);
+    }
+  }
+});
+
+assert.deepEqual(missing, []);
+
+const indexHtml = read("index.html");
+const markdownPosition = indexHtml.indexOf("assets/js/markdown.js");
+assert.ok(markdownPosition >= 0);
+assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
+assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
+assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
+
+const currentSiteSources = [
+  indexHtml,
+  read("admin.html"),
+  read("assets/css/style.css"),
+  read("assets/css/admin.css"),
+  ...fs
+    .readdirSync(path.join(projectRoot, "assets/js"))
+    .map((name) => read(`assets/js/${name}`)),
+].join("\n");
+
+assert.ok(!/assets\/img\/20\d{2}-\d{2}-\d{2}\//.test(currentSiteSources));
+assert.ok(!currentSiteSources.includes("esc-banner-logo.png"));
+assert.ok(!currentSiteSources.includes("esc-logo-icon.png"));
+
+console.log("Static asset references and script ordering checks passed.");

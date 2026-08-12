@@ -8,6 +8,15 @@ window.ESC_CONTENT = {
       keywords: "introducing ESC",
     },
     brand: "ESC",
+    branding: {
+      club_logo_storage_path: null,
+      club_logo_alt: "ESC 동아리 로고",
+      school_logo_storage_path: null,
+      school_logo_alt: "한성과학고등학교 로고",
+    },
+    appearance: {
+      contact_overlay_color: "#8b5cf6",
+    },
     navigation: {
       home: "Home",
       about: "About",
@@ -91,26 +100,11 @@ window.ESC_CONTENT = {
       intro: "더 궁금한 사항이 있다면 아래 연락처를 통해 문의해 주세요.",
       items: [
         {
-          icon: "bi-envelope",
-          label: "짱 신재훈",
-          text: "34-096@hansung-sh.hs.kr",
-          href: "https://mail.google.com/mail/?view=cm&fs=1&to=34-096@hansung-sh.hs.kr",
-          social: true,
-          social_icon: "bi-envelope",
-        },
-        {
-          icon: "bi-envelope",
-          label: "부짱 이동하",
-          text: "34-098@hansung-sh.hs.kr",
-          href: "https://mail.google.com/mail/?view=cm&fs=1&to=34-098@hansung-sh.hs.kr",
-          social: false,
-          social_icon: "bi-envelope",
-        },
-        {
+          type: "github",
           icon: "bi-github",
           label: "GitHub",
           text: "HSSHESC",
-          href: "https://github.com/HSSHESC",
+          url: "https://github.com/HSSHESC",
           social: true,
           social_icon: "bi-github",
         },
@@ -122,55 +116,6 @@ window.ESC_CONTENT = {
       admin_label: "관리자",
     },
   },
-  portfolioImageSource: {
-    repository: "HSSHESC/HSSHESC.github.io",
-    branch: "main",
-    directory: "assets/img",
-  },
-  portfolio: [
-    {
-      title: "2026 수학과학체험전",
-      date: "2026-05-21",
-      description: "중학생 대상 수학과학체험전 활동을 기획하고 운영",
-      icon: "bi-mortarboard-fill",
-      href: "https://github.com/HSSHESC/sugwachae_2026",
-    },
-    {
-      title: "2026 동아리 박람회",
-      date: "2026-03-05",
-      description:
-        "작년 활동을 신입생들에게 소개하는 동아리 박람회에서 부스 운영",
-      icon: "bi-people-fill",
-    },
-    {
-      title: "2025 한어울제",
-      date: "2025-12-24",
-      description:
-        "LoL 정글 위치 예측 프로그램, 리듬 게임, 모자이크, 3D 체스를 개발하여 부스 운영",
-      icon: "bi-shop-window",
-      href: "https://2025haneuljae-static.vercel.app/",
-    },
-    {
-      title: "2025 서울학생 AI개발 성과발표회",
-      date: "2025-12-22",
-      description: "2025 서울학생 AI개발 성과발표회에서 동상과 인기상 수상",
-      icon: "bi-robot",
-      href: "https://github.com/HSSHESC/enemy-jungle-locator",
-    },
-    {
-      title: "2025 수학과학체험전",
-      date: "2025-05-29",
-      description: "중학생 대상 수학과학체험전 활동을 기획하고 운영",
-      icon: "bi-mortarboard-fill",
-      href: "https://github.com/HSSHESC/sugwachae_2025",
-    },
-    {
-      title: "2025 동아리 박람회",
-      date: "2025-03-06",
-      description: "ESC 활동을 신입생들에게 소개하는 동아리 박람회 운영",
-      icon: "bi-people-fill",
-    },
-  ],
   contacts: [],
 };
 

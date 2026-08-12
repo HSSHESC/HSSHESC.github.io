@@ -64,20 +64,64 @@ runBrowserScript("assets/js/activities.js");
       .select("id,content")
       .eq("id", "home")
       .single();
+  const { data: photoRows, error: photoRowsError } =
+    await context.ESC_SUPABASE.from("activity_photos")
+      .select("storage_path")
+      .order("storage_path");
 
   assert.ifError(siteContentError);
+  assert.ifError(photoRowsError);
   assert.equal(siteContent.id, "home");
-  assert.equal(siteContent.content.about.title, "동아리 소개");
-  assert.equal(siteContent.content.activity_plans.items.length, 6);
-  assert.equal(siteContent.content.contact.items.length, 3);
-
-  assert.equal(activities.length, 6);
-  assert.equal(activities[0].title, "2026 수학과학체험전");
-  assert.equal(activities[0].images.length, 3);
-  assert.equal(
-    activities[0].imageCaptions[0],
-    "2026 수학과학체험전 활동 사진 1",
+  assert.equal(typeof siteContent.content.about.title, "string");
+  assert.equal(typeof siteContent.content.about.body_markdown, "string");
+  assert.equal(typeof siteContent.content.about.plans_markdown, "string");
+  assert.equal(siteContent.content.about.paragraphs, undefined);
+  assert.equal(siteContent.content.about.plans, undefined);
+  assert.ok(Array.isArray(siteContent.content.activity_plans.items));
+  assert.ok(Array.isArray(siteContent.content.contact.items));
+  assert.ok(
+    siteContent.content.contact.items.every((item) =>
+      ["email", "github"].includes(item.type),
+    ),
   );
+  assert.ok(
+    siteContent.content.contact.items
+      .filter((item) => item.type === "email")
+      .every((item) => item.email && item.href === undefined),
+  );
+  assert.ok(
+    siteContent.content.contact.items
+      .filter((item) => item.type === "github")
+      .every((item) => /^https:\/\/github\.com\//.test(item.url)),
+  );
+  assert.match(
+    siteContent.content.appearance.contact_overlay_color,
+    /^#[0-9a-f]{6}$/i,
+  );
+  assert.ok(
+    siteContent.content.branding.club_logo_storage_path === null ||
+      typeof siteContent.content.branding.club_logo_storage_path === "string",
+  );
+  assert.ok(
+    siteContent.content.branding.school_logo_storage_path === null ||
+      typeof siteContent.content.branding.school_logo_storage_path === "string",
+  );
+
+  assert.ok(photoRows.length > 0);
+  assert.ok(
+    photoRows.every((photo) =>
+      /^[0-9a-f-]{36}\/(legacy|[0-9a-f-]+)\//i.test(photo.storage_path),
+    ),
+  );
+
+  assert.ok(activities.length > 0);
+  assert.ok(activities.every((activity) => activity.title));
+  assert.equal(
+    photoRows.length,
+    activities.reduce((count, activity) => count + activity.images.length, 0),
+  );
+  assert.ok(activities[0].images.length > 0);
+  assert.equal(typeof activities[0].imageCaptions[0], "string");
   assert.ok(
     activities.every((activity) =>
       activity.images.every((image) =>
@@ -95,10 +139,7 @@ runBrowserScript("assets/js/activities.js");
 
   const firstImageResponse = await fetch(activities[0].images[0]);
   assert.equal(firstImageResponse.ok, true);
-  assert.equal(
-    Number(firstImageResponse.headers.get("content-length")),
-    232826,
-  );
+  assert.ok(Number(firstImageResponse.headers.get("content-length")) > 0);
 
   const unsignedPublicImageUrl = `${activities[0].images[0]
     .replace("/storage/v1/object/sign/", "/storage/v1/object/public/")

@@ -3,6 +3,7 @@
 
   const client = window.ESC_SUPABASE;
   const bucket = window.ESC_SUPABASE_CONFIG?.activityBucket;
+  const siteAssetsBucket = window.ESC_SUPABASE_CONFIG?.siteAssetsBucket;
   const fallbackSiteContent = window.ESC_CONTENT?.site ?? {};
   const maxImageSize = 6 * 1024 * 1024;
   const signedUrlLifetimeSeconds = 60 * 60;
@@ -42,6 +43,7 @@
     activityDescription: document.querySelector("#activityDescription"),
     activityForm: document.querySelector("#activityForm"),
     activityIcon: document.querySelector("#activityIcon"),
+    activityIconPreview: document.querySelector("#activityIconPreview"),
     activityId: document.querySelector("#activityId"),
     activityList: document.querySelector("#activityList"),
     activityPublished: document.querySelector("#activityPublished"),
@@ -57,7 +59,14 @@
     aboutTitleText: document.querySelector("#aboutTitleText"),
     contactContentItems: document.querySelector("#contactContentItems"),
     contactIntroText: document.querySelector("#contactIntroText"),
+    contactOverlayColor: document.querySelector("#contactOverlayColor"),
+    contactOverlayColorValue: document.querySelector(
+      "#contactOverlayColorValue",
+    ),
     contactTitleText: document.querySelector("#contactTitleText"),
+    clubLogoAlt: document.querySelector("#clubLogoAlt"),
+    clubLogoFile: document.querySelector("#clubLogoFile"),
+    clubLogoPreview: document.querySelector("#clubLogoPreview"),
     dashboardSection: document.querySelector("#dashboardSection"),
     deleteActivityButton: document.querySelector("#deleteActivityButton"),
     editorKicker: document.querySelector("#editorKicker"),
@@ -86,8 +95,9 @@
     portfolioTitleText: document.querySelector("#portfolioTitleText"),
     resetActivityButton: document.querySelector("#resetActivityButton"),
     resetSiteContentButton: document.querySelector("#resetSiteContentButton"),
+    removeClubLogoButton: document.querySelector("#removeClubLogoButton"),
+    removeSchoolLogoButton: document.querySelector("#removeSchoolLogoButton"),
     saveActivityButton: document.querySelector("#saveActivityButton"),
-    saveSiteContentButton: document.querySelector("#saveSiteContentButton"),
     serviceContentItems: document.querySelector("#serviceContentItems"),
     servicesSubtitleText: document.querySelector("#servicesSubtitleText"),
     servicesTitleText: document.querySelector("#servicesTitleText"),
@@ -98,6 +108,9 @@
     siteMetaDescription: document.querySelector("#siteMetaDescription"),
     siteMetaKeywords: document.querySelector("#siteMetaKeywords"),
     siteMetaTitle: document.querySelector("#siteMetaTitle"),
+    schoolLogoAlt: document.querySelector("#schoolLogoAlt"),
+    schoolLogoFile: document.querySelector("#schoolLogoFile"),
+    schoolLogoPreview: document.querySelector("#schoolLogoPreview"),
   };
 
   const state = {
@@ -107,7 +120,11 @@
     photos: [],
     previewUrls: [],
     selectedActivityId: null,
+    siteContentSaveInProgress: false,
     siteContent: null,
+    logoFiles: { club: null, school: null },
+    logoPreviewUrls: { club: null, school: null },
+    removeLogos: { club: false, school: false },
   };
 
   const isPlainObject = (value) =>
@@ -156,6 +173,31 @@
     return select;
   };
 
+  const getIconLabel = (value) =>
+    iconOptions.find(([icon]) => icon === value)?.[1] ?? "아이콘";
+
+  const updateIconPreview = (select, preview) => {
+    const icon = preview.querySelector("i");
+    const label = preview.querySelector("span");
+    icon.className = `bi ${select.value}`;
+    label.textContent = getIconLabel(select.value);
+  };
+
+  const createIconPicker = (select) => {
+    const picker = document.createElement("div");
+    picker.className = "icon-picker";
+    const preview = document.createElement("span");
+    preview.className = "icon-preview";
+    const icon = document.createElement("i");
+    icon.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    preview.append(icon, label);
+    picker.append(select, preview);
+    updateIconPreview(select, preview);
+    select.addEventListener("change", () => updateIconPreview(select, preview));
+    return picker;
+  };
+
   const activateAdminView = (view) => {
     const showActivities = view === "activities";
     elements.activityAdminView.hidden = !showActivities;
@@ -201,28 +243,37 @@
     elements.saveActivityButton.textContent = busy ? "저장 중..." : "저장";
   };
 
-  const setSiteContentBusy = (busy) => {
-    elements.siteContentForm.setAttribute("aria-busy", String(busy));
-    elements.siteContentForm
+  const setSiteContentBusy = (sectionName, busy) => {
+    const section = elements.siteContentForm.querySelector(
+      `[data-content-section="${sectionName}"]`,
+    );
+    if (!section) {
+      return;
+    }
+    section.setAttribute("aria-busy", String(busy));
+    section
       .querySelectorAll("input, textarea, select, button")
       .forEach((element) => {
         element.disabled = busy;
       });
-    elements.saveSiteContentButton.textContent = busy
-      ? "저장 중..."
-      : "페이지 문구 저장";
+    const saveButton = section.querySelector(".save-content-section");
+    if (saveButton) {
+      saveButton.dataset.defaultLabel ||= saveButton.textContent.trim();
+      saveButton.textContent = busy
+        ? "저장 중..."
+        : saveButton.dataset.defaultLabel;
+    }
+    elements.siteContentForm
+      .querySelectorAll(".save-content-section")
+      .forEach((button) => {
+        button.disabled = busy;
+      });
   };
 
   const getActivityPhotos = (activityId) =>
     state.photos.filter((photo) => photo.activity_id === activityId);
 
-  const getPhotoUrl = (photo) => {
-    if (photo.storage_path) {
-      return photo.signed_url ?? "";
-    }
-
-    return photo.image_url;
-  };
+  const getPhotoUrl = (photo) => photo.signed_url ?? "";
 
   const addSignedPhotoUrls = async (photos) => {
     const paths = [
@@ -380,9 +431,7 @@
 
       const source = document.createElement("p");
       source.className = "photo-source-note";
-      source.textContent = photo.storage_path
-        ? "Supabase Storage 이미지"
-        : "기존 홈페이지 이미지";
+      source.textContent = "Supabase Storage 이미지";
 
       fields.append(captionGroup, orderGroup);
       fieldContainer.append(fields, source);
@@ -512,7 +561,7 @@
       item.icon ?? "bi-stars",
       "service-item-icon",
     );
-    iconColumn.append(iconLabel, iconSelect);
+    iconColumn.append(iconLabel, createIconPicker(iconSelect));
 
     const descriptionColumn = document.createElement("div");
     descriptionColumn.className = "col-12";
@@ -525,7 +574,14 @@
     descriptionInput.rows = 3;
     descriptionInput.required = true;
     descriptionInput.value = item.description ?? "";
-    descriptionColumn.append(descriptionLabel, descriptionInput);
+    const descriptionHelp = document.createElement("div");
+    descriptionHelp.className = "form-text";
+    descriptionHelp.textContent = "Markdown을 사용할 수 있습니다.";
+    descriptionColumn.append(
+      descriptionLabel,
+      descriptionInput,
+      descriptionHelp,
+    );
 
     fields.append(titleColumn, iconColumn, descriptionColumn);
     row.append(heading, fields);
@@ -560,44 +616,72 @@
 
     const fields = document.createElement("div");
     fields.className = "row g-3";
+    const inferredType =
+      item.type === "github" ||
+      item.icon === "bi-github" ||
+      /github\.com/i.test(item.url ?? item.href ?? "")
+        ? "github"
+        : "email";
 
-    const fieldDefinitions = [
-      ["col-md-4", "이름", "contact-item-label", item.label ?? "", "text"],
-      ["col-md-4", "표시 내용", "contact-item-text", item.text ?? "", "text"],
-      ["col-md-4", "링크", "contact-item-href", item.href ?? "", "url"],
-    ];
+    const typeColumn = document.createElement("div");
+    typeColumn.className = "col-md-4";
+    const typeLabel = document.createElement("label");
+    typeLabel.className = "form-label";
+    typeLabel.textContent = "연락처 유형";
+    const typeSelect = document.createElement("select");
+    typeSelect.className = "form-select contact-item-type";
+    [
+      ["email", "개인 연락처(이메일)"],
+      ["github", "GitHub"],
+    ].forEach(([value, text]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text;
+      typeSelect.append(option);
+    });
+    typeSelect.value = inferredType;
+    typeColumn.append(typeLabel, typeSelect);
 
-    fieldDefinitions.forEach(
-      ([columnClass, labelText, inputClass, value, type]) => {
-        const column = document.createElement("div");
-        column.className = columnClass;
-        const fieldLabel = document.createElement("label");
-        fieldLabel.className = "form-label";
-        fieldLabel.textContent = labelText;
-        const input = document.createElement("input");
-        input.className = `form-control ${inputClass}`;
-        input.type = type;
-        input.maxLength = type === "url" ? 2000 : 160;
-        input.required = true;
-        input.value = value;
-        if (type === "url") {
-          input.placeholder = "https://";
-        }
-        column.append(fieldLabel, input);
-        fields.append(column);
-      },
-    );
+    const nameColumn = document.createElement("div");
+    nameColumn.className = "col-md-4";
+    const nameLabel = document.createElement("label");
+    nameLabel.className = "form-label contact-item-name-label";
+    const nameInput = document.createElement("input");
+    nameInput.className = "form-control contact-item-name";
+    nameInput.type = "text";
+    nameInput.maxLength = 160;
+    nameInput.required = true;
+    nameInput.value =
+      inferredType === "github"
+        ? (item.text ?? item.label ?? "")
+        : (item.label ?? "");
+    nameColumn.append(nameLabel, nameInput);
+
+    const valueColumn = document.createElement("div");
+    valueColumn.className = "col-md-4";
+    const valueLabel = document.createElement("label");
+    valueLabel.className = "form-label contact-item-value-label";
+    const valueInput = document.createElement("input");
+    valueInput.className = "form-control contact-item-value";
+    valueInput.required = true;
+    valueInput.value =
+      inferredType === "github"
+        ? (item.url ?? item.href ?? "")
+        : (item.email ?? item.text ?? "");
+    valueColumn.append(valueLabel, valueInput);
 
     const iconColumn = document.createElement("div");
     iconColumn.className = "col-md-5";
     const iconLabel = document.createElement("label");
     iconLabel.className = "form-label";
-    iconLabel.textContent = "아이콘";
-    const iconSelect = createIconSelect(
-      item.icon ?? "bi-link-45deg",
-      "contact-item-icon",
+    iconLabel.textContent = "아이콘 미리보기";
+    const iconPreview = document.createElement("span");
+    iconPreview.className = "icon-preview contact-item-icon-preview";
+    iconPreview.append(
+      document.createElement("i"),
+      document.createElement("span"),
     );
-    iconColumn.append(iconLabel, iconSelect);
+    iconColumn.append(iconLabel, iconPreview);
 
     const socialColumn = document.createElement("div");
     socialColumn.className =
@@ -614,10 +698,122 @@
     socialGroup.append(socialInput, socialLabel);
     socialColumn.append(socialGroup);
 
-    fields.append(iconColumn, socialColumn);
+    const updateContactFields = () => {
+      const github = typeSelect.value === "github";
+      nameLabel.textContent = github ? "GitHub 이름" : "이름";
+      valueLabel.textContent = github ? "GitHub 링크" : "이메일 주소";
+      valueInput.type = github ? "url" : "email";
+      valueInput.maxLength = github ? 2000 : 320;
+      valueInput.placeholder = github
+        ? "https://github.com/..."
+        : "name@example.com";
+      const iconValue = github ? "bi-github" : "bi-envelope";
+      const previewIcon = iconPreview.querySelector("i");
+      previewIcon.className = `bi ${iconValue}`;
+      previewIcon.setAttribute("aria-hidden", "true");
+      iconPreview.querySelector("span").textContent = github
+        ? "GitHub"
+        : "이메일";
+      valueInput.setCustomValidity("");
+    };
+    const validateContactValue = () => {
+      if (typeSelect.value !== "github" || !valueInput.value) {
+        valueInput.setCustomValidity("");
+        return;
+      }
+      try {
+        const url = new URL(valueInput.value);
+        const valid =
+          url.protocol === "https:" &&
+          ["github.com", "www.github.com"].includes(url.hostname);
+        valueInput.setCustomValidity(
+          valid ? "" : "https://github.com/으로 시작하는 링크를 입력해 주세요.",
+        );
+      } catch {
+        valueInput.setCustomValidity("올바른 GitHub 링크를 입력해 주세요.");
+      }
+    };
+    typeSelect.addEventListener("change", updateContactFields);
+    typeSelect.addEventListener("change", validateContactValue);
+    valueInput.addEventListener("input", validateContactValue);
+    updateContactFields();
+    validateContactValue();
+
+    const generatedLinkNote = document.createElement("p");
+    generatedLinkNote.className = "contact-type-note";
+    generatedLinkNote.textContent =
+      "이메일 연락처의 메일 링크는 입력한 이메일 주소로 자동 생성됩니다.";
+
+    fields.append(
+      typeColumn,
+      nameColumn,
+      valueColumn,
+      iconColumn,
+      socialColumn,
+    );
     row.append(heading, fields);
+    row.append(generatedLinkNote);
     elements.contactContentItems.append(row);
     renumberRepeatItems(elements.contactContentItems, "연락처");
+  };
+
+  const logoFields = {
+    club: {
+      file: elements.clubLogoFile,
+      pathKey: "club_logo_storage_path",
+      preview: elements.clubLogoPreview,
+      removeButton: elements.removeClubLogoButton,
+    },
+    school: {
+      file: elements.schoolLogoFile,
+      pathKey: "school_logo_storage_path",
+      preview: elements.schoolLogoPreview,
+      removeButton: elements.removeSchoolLogoButton,
+    },
+  };
+
+  const revokeLogoPreview = (kind) => {
+    if (state.logoPreviewUrls[kind]) {
+      URL.revokeObjectURL(state.logoPreviewUrls[kind]);
+      state.logoPreviewUrls[kind] = null;
+    }
+  };
+
+  const getPublicAssetUrl = (path) => {
+    if (!path) {
+      return "";
+    }
+    return client.storage.from(siteAssetsBucket).getPublicUrl(path).data
+      .publicUrl;
+  };
+
+  const refreshLogoPreview = (kind) => {
+    const fields = logoFields[kind];
+    revokeLogoPreview(kind);
+    const currentPath = state.siteContent?.branding?.[fields.pathKey] ?? "";
+    let previewUrl = "";
+
+    if (state.logoFiles[kind]) {
+      state.logoPreviewUrls[kind] = URL.createObjectURL(state.logoFiles[kind]);
+      previewUrl = state.logoPreviewUrls[kind];
+    } else if (!state.removeLogos[kind] && currentPath) {
+      previewUrl = getPublicAssetUrl(currentPath);
+    } else if (!state.removeLogos[kind]) {
+      previewUrl =
+        kind === "club"
+          ? "assets/img/esc-logo.png"
+          : "assets/img/hssh-logo.jpg";
+    }
+
+    if (previewUrl) {
+      fields.preview.src = previewUrl;
+    } else {
+      fields.preview.removeAttribute("src");
+    }
+    fields.removeButton.hidden = !(
+      state.logoFiles[kind] ||
+      (!state.removeLogos[kind] && currentPath)
+    );
   };
 
   const renderSiteContentForm = () => {
@@ -626,6 +822,11 @@
     elements.siteMetaDescription.value = content.meta?.description ?? "";
     elements.siteMetaKeywords.value = content.meta?.keywords ?? "";
     elements.siteBrand.value = content.brand ?? "";
+    elements.clubLogoAlt.value =
+      content.branding?.club_logo_alt ??
+      `${content.brand ?? "ESC"} 동아리 로고`;
+    elements.schoolLogoAlt.value =
+      content.branding?.school_logo_alt ?? "학교 로고";
     elements.navHomeText.value = content.navigation?.home ?? "";
     elements.navAboutText.value = content.navigation?.about ?? "";
     elements.navActivitiesText.value = content.navigation?.activities ?? "";
@@ -637,16 +838,25 @@
     );
     elements.aboutTitleText.value = content.about?.title ?? "";
     elements.aboutSchoolUrl.value = content.about?.school_url ?? "";
-    elements.aboutParagraphs.value = (content.about?.paragraphs ?? []).join(
-      "\n",
-    );
-    elements.aboutPlans.value = (content.about?.plans ?? []).join("\n");
+    elements.aboutParagraphs.value =
+      content.about?.body_markdown ??
+      (content.about?.paragraphs ?? []).join("\n\n");
+    elements.aboutPlans.value =
+      content.about?.plans_markdown ??
+      (content.about?.plans ?? []).map((item) => `- ${item}`).join("\n");
     elements.servicesTitleText.value = content.activity_plans?.title ?? "";
     elements.servicesSubtitleText.value =
       content.activity_plans?.subtitle ?? "";
     elements.portfolioTitleText.value = content.portfolio?.title ?? "";
     elements.contactTitleText.value = content.contact?.title ?? "";
     elements.contactIntroText.value = content.contact?.intro ?? "";
+    const overlayColor = /^#[0-9a-f]{6}$/i.test(
+      content.appearance?.contact_overlay_color ?? "",
+    )
+      ? content.appearance.contact_overlay_color
+      : "#8b5cf6";
+    elements.contactOverlayColor.value = overlayColor;
+    elements.contactOverlayColorValue.value = overlayColor.toUpperCase();
     elements.footerCopyrightName.value = content.footer?.copyright_name ?? "";
     elements.footerRightsText.value = content.footer?.rights_text ?? "";
     elements.footerAdminLabel.value = content.footer?.admin_label ?? "";
@@ -664,75 +874,151 @@
       elements.contactContentItems,
       "등록된 연락처가 없습니다.",
     );
+
+    for (const kind of Object.keys(logoFields)) {
+      state.logoFiles[kind] = null;
+      state.removeLogos[kind] = false;
+      logoFields[kind].file.value = "";
+      refreshLogoPreview(kind);
+    }
   };
 
-  const readSiteContentForm = () => ({
-    meta: {
-      title: elements.siteMetaTitle.value.trim(),
-      description: elements.siteMetaDescription.value.trim(),
-      keywords: elements.siteMetaKeywords.value.trim(),
-    },
-    brand: elements.siteBrand.value.trim(),
-    navigation: {
-      home: elements.navHomeText.value.trim(),
-      about: elements.navAboutText.value.trim(),
-      activities: elements.navActivitiesText.value.trim(),
-      portfolio: elements.navPortfolioText.value.trim(),
-      contact: elements.navContactText.value.trim(),
-    },
-    hero: {
-      title: elements.heroTitleText.value.trim(),
-      typed_items: splitLines(elements.heroTypedItems.value),
-    },
-    about: {
-      title: elements.aboutTitleText.value.trim(),
-      school_url: elements.aboutSchoolUrl.value.trim(),
-      paragraphs: splitLines(elements.aboutParagraphs.value),
-      plans: splitLines(elements.aboutPlans.value),
-    },
-    activity_plans: {
-      title: elements.servicesTitleText.value.trim(),
-      subtitle: elements.servicesSubtitleText.value.trim(),
-      items: [
-        ...elements.serviceContentItems.querySelectorAll(
-          ".service-content-row",
-        ),
-      ].map((row) => ({
-        title: row.querySelector(".service-item-title").value.trim(),
-        description: row
-          .querySelector(".service-item-description")
-          .value.trim(),
-        icon: row.querySelector(".service-item-icon").value,
-      })),
-    },
-    portfolio: {
-      title: elements.portfolioTitleText.value.trim(),
-    },
-    contact: {
-      title: elements.contactTitleText.value.trim(),
-      intro: elements.contactIntroText.value.trim(),
-      items: [
-        ...elements.contactContentItems.querySelectorAll(
-          ".contact-content-row",
-        ),
-      ].map((row) => {
-        const icon = row.querySelector(".contact-item-icon").value;
-        return {
-          label: row.querySelector(".contact-item-label").value.trim(),
-          text: row.querySelector(".contact-item-text").value.trim(),
-          href: row.querySelector(".contact-item-href").value.trim(),
-          icon,
-          social: row.querySelector(".contact-item-social").checked,
-          social_icon: icon,
-        };
-      }),
-    },
-    footer: {
-      copyright_name: elements.footerCopyrightName.value.trim(),
-      rights_text: elements.footerRightsText.value.trim(),
-      admin_label: elements.footerAdminLabel.value.trim(),
-    },
-  });
+  const readSiteContentSection = (sectionName) => {
+    if (sectionName === "basics") {
+      return {
+        meta: {
+          title: elements.siteMetaTitle.value.trim(),
+          description: elements.siteMetaDescription.value.trim(),
+          keywords: elements.siteMetaKeywords.value.trim(),
+        },
+        brand: elements.siteBrand.value.trim(),
+        branding: {
+          club_logo_alt: elements.clubLogoAlt.value.trim(),
+          club_logo_storage_path: state.removeLogos.club
+            ? null
+            : (state.siteContent?.branding?.club_logo_storage_path ?? null),
+          school_logo_alt: elements.schoolLogoAlt.value.trim(),
+          school_logo_storage_path: state.removeLogos.school
+            ? null
+            : (state.siteContent?.branding?.school_logo_storage_path ?? null),
+        },
+        navigation: {
+          home: elements.navHomeText.value.trim(),
+          about: elements.navAboutText.value.trim(),
+          activities: elements.navActivitiesText.value.trim(),
+          portfolio: elements.navPortfolioText.value.trim(),
+          contact: elements.navContactText.value.trim(),
+        },
+      };
+    }
+
+    if (sectionName === "introduction") {
+      return {
+        hero: {
+          title: elements.heroTitleText.value.trim(),
+          typed_items: splitLines(elements.heroTypedItems.value),
+        },
+        about: {
+          title: elements.aboutTitleText.value.trim(),
+          school_url: elements.aboutSchoolUrl.value.trim(),
+          body_markdown: elements.aboutParagraphs.value.trim(),
+          plans_markdown: elements.aboutPlans.value.trim(),
+        },
+      };
+    }
+
+    if (sectionName === "plans") {
+      return {
+        activity_plans: {
+          title: elements.servicesTitleText.value.trim(),
+          subtitle: elements.servicesSubtitleText.value.trim(),
+          items: [
+            ...elements.serviceContentItems.querySelectorAll(
+              ".service-content-row",
+            ),
+          ].map((row) => ({
+            title: row.querySelector(".service-item-title").value.trim(),
+            description: row
+              .querySelector(".service-item-description")
+              .value.trim(),
+            icon: row.querySelector(".service-item-icon").value,
+          })),
+        },
+      };
+    }
+
+    if (sectionName === "contact") {
+      return {
+        portfolio: { title: elements.portfolioTitleText.value.trim() },
+        appearance: {
+          contact_overlay_color: elements.contactOverlayColor.value,
+        },
+        contact: {
+          title: elements.contactTitleText.value.trim(),
+          intro: elements.contactIntroText.value.trim(),
+          items: [
+            ...elements.contactContentItems.querySelectorAll(
+              ".contact-content-row",
+            ),
+          ].map((row) => {
+            const type = row.querySelector(".contact-item-type").value;
+            const name = row.querySelector(".contact-item-name").value.trim();
+            const value = row.querySelector(".contact-item-value").value.trim();
+            const social = row.querySelector(".contact-item-social").checked;
+            return type === "github"
+              ? {
+                  type,
+                  label: "GitHub",
+                  text: name,
+                  url: value,
+                  icon: "bi-github",
+                  social,
+                  social_icon: "bi-github",
+                }
+              : {
+                  type,
+                  label: name,
+                  text: value,
+                  email: value,
+                  icon: "bi-envelope",
+                  social,
+                  social_icon: "bi-envelope",
+                };
+          }),
+        },
+      };
+    }
+
+    return {
+      footer: {
+        copyright_name: elements.footerCopyrightName.value.trim(),
+        rights_text: elements.footerRightsText.value.trim(),
+        admin_label: elements.footerAdminLabel.value.trim(),
+      },
+    };
+  };
+
+  const validateContentSection = (sectionName) => {
+    const section = elements.siteContentForm.querySelector(
+      `[data-content-section="${sectionName}"]`,
+    );
+    const invalid = [...section.querySelectorAll("input, textarea, select")]
+      .filter((field) => !field.disabled)
+      .find((field) => !field.checkValidity());
+    if (invalid) {
+      invalid.reportValidity();
+      invalid.focus();
+      return false;
+    }
+    if (
+      sectionName === "introduction" &&
+      !splitLines(elements.heroTypedItems.value).length
+    ) {
+      setMessage("움직이는 단어를 한 개 이상 입력해 주세요.", "warning");
+      return false;
+    }
+    return true;
+  };
 
   const loadSiteContent = async () => {
     const { data, error } = await client
@@ -749,28 +1035,48 @@
     renderSiteContentForm();
   };
 
-  const handleSaveSiteContent = async (event) => {
-    event.preventDefault();
+  const uploadLogo = async (kind, file) => {
+    const extension = extensionByMimeType[file.type];
+    const storagePath = `branding/${kind}/${createUuid()}.${extension}`;
+    const { error } = await client.storage
+      .from(siteAssetsBucket)
+      .upload(storagePath, file, {
+        cacheControl: "31536000",
+        contentType: file.type,
+        upsert: false,
+      });
+    if (error) {
+      throw error;
+    }
+    return storagePath;
+  };
+
+  const contentSectionLabels = {
+    basics: "기본 정보와 메뉴",
+    introduction: "첫 화면과 동아리 소개",
+    plans: "활동 계획 카드",
+    contact: "포트폴리오와 연락처",
+    footer: "푸터",
+  };
+
+  const handleSaveSiteContentSection = async (sectionName) => {
+    if (state.siteContentSaveInProgress) {
+      return;
+    }
     clearMessage();
-
-    if (!elements.siteContentForm.reportValidity()) {
+    if (!validateContentSection(sectionName)) {
       return;
     }
 
-    const content = readSiteContentForm();
-    if (
-      !content.hero.typed_items.length ||
-      !content.about.paragraphs.length ||
-      !content.about.plans.length
-    ) {
-      setMessage(
-        "움직이는 단어, 소개 문단과 활동 목록을 각각 한 개 이상 입력해 주세요.",
-        "warning",
-      );
-      return;
-    }
-
-    setSiteContentBusy(true);
+    state.siteContentSaveInProgress = true;
+    setSiteContentBusy(sectionName, true);
+    const previousLogoPaths = Object.fromEntries(
+      Object.entries(logoFields).map(([kind, fields]) => [
+        kind,
+        state.siteContent?.branding?.[fields.pathKey] ?? null,
+      ]),
+    );
+    const uploadedLogoPaths = [];
 
     try {
       const {
@@ -781,34 +1087,91 @@
         throw userError ?? new Error("Authenticated user is unavailable.");
       }
 
+      const sectionContent = readSiteContentSection(sectionName);
+      if (sectionName === "basics") {
+        for (const [kind, file] of Object.entries(state.logoFiles)) {
+          if (!file) {
+            continue;
+          }
+          const path = await uploadLogo(kind, file);
+          uploadedLogoPaths.push(path);
+          sectionContent.branding[logoFields[kind].pathKey] = path;
+        }
+      }
+      const nextContent = mergeContent(
+        state.siteContent ?? fallbackSiteContent,
+        sectionContent,
+      );
       const { data, error } = await client
         .from("site_content")
         .upsert(
-          {
-            id: "home",
-            content,
-            updated_by: user.id,
-          },
+          { id: "home", content: nextContent, updated_by: user.id },
           { onConflict: "id" },
         )
         .select("content")
         .single();
-
       if (error) {
         throw error;
       }
 
       state.siteContent = mergeContent(fallbackSiteContent, data.content);
-      renderSiteContentForm();
-      setMessage("페이지 문구가 저장되었습니다.", "success");
-    } catch (error) {
-      console.error("페이지 문구 저장에 실패했습니다.", error);
+      let cleanupWarning = false;
+      if (sectionName === "basics") {
+        const pathsToRemove = Object.entries(logoFields).flatMap(
+          ([kind, fields]) => {
+            const previousPath = previousLogoPaths[kind];
+            const currentPath =
+              state.siteContent.branding?.[fields.pathKey] ?? null;
+            return previousPath && previousPath !== currentPath
+              ? [previousPath]
+              : [];
+          },
+        );
+        if (pathsToRemove.length) {
+          const { error: removeError } = await client.storage
+            .from(siteAssetsBucket)
+            .remove(pathsToRemove);
+          if (removeError) {
+            cleanupWarning = true;
+            console.error("이전 로고 파일 정리에 실패했습니다.", removeError);
+          }
+        }
+      }
+
+      if (sectionName === "basics") {
+        for (const kind of Object.keys(logoFields)) {
+          state.logoFiles[kind] = null;
+          state.removeLogos[kind] = false;
+          logoFields[kind].file.value = "";
+          refreshLogoPreview(kind);
+        }
+      }
       setMessage(
-        "페이지 문구를 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.",
+        cleanupWarning
+          ? `${contentSectionLabels[sectionName]} 영역은 저장됐지만 이전 로고 파일 정리가 필요합니다.`
+          : `${contentSectionLabels[sectionName]} 영역이 저장되었습니다.`,
+        cleanupWarning ? "warning" : "success",
+      );
+    } catch (error) {
+      if (uploadedLogoPaths.length) {
+        const { error: cleanupError } = await client.storage
+          .from(siteAssetsBucket)
+          .remove(uploadedLogoPaths);
+        if (cleanupError) {
+          console.error(
+            "실패한 로고 업로드 정리에 실패했습니다.",
+            cleanupError,
+          );
+        }
+      }
+      console.error("페이지 영역 저장에 실패했습니다.", error);
+      setMessage(
+        `${contentSectionLabels[sectionName]} 영역을 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.`,
         "danger",
       );
     } finally {
-      setSiteContentBusy(false);
+      setSiteContentBusy(sectionName, false);
+      state.siteContentSaveInProgress = false;
     }
   };
 
@@ -819,6 +1182,7 @@
     elements.activityForm.reset();
     elements.activityId.value = "";
     elements.activityIcon.value = "bi-stars";
+    updateIconPreview(elements.activityIcon, elements.activityIconPreview);
     elements.activityPublished.checked = true;
     elements.newPhotos.value = "";
     elements.editorKicker.textContent = "새 활동";
@@ -849,6 +1213,7 @@
     elements.activityDescription.value = activity.description;
     elements.activityUrl.value = activity.external_url ?? "";
     elements.activityIcon.value = activity.icon;
+    updateIconPreview(elements.activityIcon, elements.activityIconPreview);
     elements.activityPublished.checked = activity.is_published;
     elements.editorKicker.textContent = "활동 수정";
     elements.editorTitle.textContent = activity.title;
@@ -870,7 +1235,7 @@
       client
         .from("activity_photos")
         .select(
-          "id,activity_id,storage_path,image_url,caption,display_order,created_by,created_at,updated_at",
+          "id,activity_id,storage_path,caption,display_order,created_by,created_at,updated_at",
         )
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: true }),
@@ -910,6 +1275,7 @@
     state.newFiles = [];
     state.siteContent = null;
     revokePreviewUrls();
+    Object.keys(state.logoPreviewUrls).forEach(revokeLogoPreview);
     elements.loginSection.hidden = false;
     elements.dashboardSection.hidden = true;
     elements.logoutButton.hidden = true;
@@ -950,33 +1316,39 @@
 
   const saveExistingPhotoMetadata = async () => {
     const rows = [...document.querySelectorAll(".existing-photo-row")];
+    const updates = rows.map((row) => {
+      const photo = state.photos.find(
+        (item) => item.id === row.dataset.photoId,
+      );
+      if (!photo) {
+        throw new Error("An activity photo could not be found.");
+      }
+      const caption = row.querySelector(".photo-caption").value.trim();
+      const parsedOrder = Number.parseInt(
+        row.querySelector(".photo-order").value,
+        10,
+      );
+      const displayOrder = Number.isNaN(parsedOrder)
+        ? 0
+        : Math.max(0, parsedOrder);
 
-    const results = await Promise.all(
-      rows.map((row) => {
-        const caption = row.querySelector(".photo-caption").value.trim();
-        const parsedOrder = Number.parseInt(
-          row.querySelector(".photo-order").value,
-          10,
-        );
-        const displayOrder = Number.isNaN(parsedOrder)
-          ? 0
-          : Math.max(0, parsedOrder);
+      return {
+        id: photo.id,
+        activity_id: photo.activity_id,
+        storage_path: photo.storage_path,
+        caption,
+        display_order: displayOrder,
+      };
+    });
+    if (!updates.length) {
+      return;
+    }
 
-        return client
-          .from("activity_photos")
-          .update({
-            caption,
-            display_order: displayOrder,
-          })
-          .eq("id", row.dataset.photoId)
-          .select("id")
-          .single();
-      }),
-    );
-
-    const failedResult = results.find((result) => result.error);
-    if (failedResult) {
-      throw failedResult.error;
+    const { error } = await client
+      .from("activity_photos")
+      .upsert(updates, { onConflict: "id" });
+    if (error) {
+      throw error;
     }
   };
 
@@ -1299,8 +1671,37 @@
     }
   };
 
+  const handleLogoSelection = (kind, event) => {
+    const [file] = event.target.files;
+    if (!file) {
+      state.logoFiles[kind] = null;
+      refreshLogoPreview(kind);
+      return;
+    }
+    if (!allowedImageTypes.has(file.type) || file.size > maxImageSize) {
+      event.target.value = "";
+      state.logoFiles[kind] = null;
+      setMessage(
+        "로고 파일은 AVIF, GIF, JPG, PNG, WebP 형식이며 6 MiB 이하여야 합니다.",
+        "warning",
+      );
+      refreshLogoPreview(kind);
+      return;
+    }
+    state.logoFiles[kind] = file;
+    state.removeLogos[kind] = false;
+    refreshLogoPreview(kind);
+  };
+
+  const removeLogo = (kind) => {
+    state.logoFiles[kind] = null;
+    state.removeLogos[kind] = true;
+    logoFields[kind].file.value = "";
+    refreshLogoPreview(kind);
+  };
+
   const initialize = async () => {
-    if (!client || !bucket) {
+    if (!client || !bucket || !siteAssetsBucket) {
       setMessage(
         "Supabase 설정을 불러오지 못했습니다. 관리자에게 문의해 주세요.",
         "danger",
@@ -1330,8 +1731,27 @@
 
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.activityForm.addEventListener("submit", handleSaveActivity);
-  elements.siteContentForm.addEventListener("submit", handleSaveSiteContent);
+  elements.siteContentForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const sectionName = event.submitter?.dataset.section;
+    if (sectionName) {
+      handleSaveSiteContentSection(sectionName);
+    }
+  });
   elements.newPhotos.addEventListener("change", handlePhotoSelection);
+  Object.entries(logoFields).forEach(([kind, fields]) => {
+    fields.file.addEventListener("change", (event) =>
+      handleLogoSelection(kind, event),
+    );
+    fields.removeButton.addEventListener("click", () => removeLogo(kind));
+  });
+  elements.activityIcon.addEventListener("change", () =>
+    updateIconPreview(elements.activityIcon, elements.activityIconPreview),
+  );
+  elements.contactOverlayColor.addEventListener("input", () => {
+    elements.contactOverlayColorValue.value =
+      elements.contactOverlayColor.value.toUpperCase();
+  });
   elements.activityViewTab.addEventListener("click", () => {
     clearMessage();
     activateAdminView("activities");
@@ -1349,10 +1769,10 @@
   });
   elements.addContactItemButton.addEventListener("click", () => {
     appendContactContentItem({
+      type: "email",
       label: "",
-      text: "",
-      href: "",
-      icon: "bi-link-45deg",
+      email: "",
+      icon: "bi-envelope",
       social: false,
     });
   });
@@ -1395,6 +1815,9 @@
     }
   });
 
-  window.addEventListener("beforeunload", revokePreviewUrls);
+  window.addEventListener("beforeunload", () => {
+    revokePreviewUrls();
+    Object.keys(logoFields).forEach(revokeLogoPreview);
+  });
   initialize();
 })();
