@@ -39,13 +39,13 @@ window.ESC_CONTENT = {
       title: "동아리 소개",
       school_url: "https://hansungsh.sen.hs.kr/",
       body_markdown:
-        "안녕하세요! 저희는 한성과학고등학교의 정보공학 동아리 ESC입니다.\n\n동아리 이름 ESC는 Engineering Science of Computer라는 의미입니다.\n\nESC에서는 정보공학과 관련된 다양한 활동을 진행합니다. 2026학년도에 계획된 활동은 다음과 같습니다.",
+        "안녕하세요! 저희는 한성과학고등학교의 정보공학 동아리 ESC입니다.\n\n동아리 이름 ESC는 Engineering Science of Computer라는 의미입니다.\n\nESC에서는 정보공학과 관련된 다양한 활동을 진행합니다. {year}학년도에 계획된 활동은 다음과 같습니다.",
       plans_markdown:
         "- 실생활이나 연구 과정에서 활용 가능한 프로그램과 프로그래밍 언어를 익히고, 이를 활용합니다.\n- 한성과학고등학교 수학과학체험전에서 중학생 대상 활동을 기획하고 운영합니다.\n- 한어울제를 위한 프로젝트를 기획 및 제작하고 부스를 운영합니다.\n- 세종과학고등학교 정보과학 동아리 CPU와 교류 활동을 진행합니다.",
     },
     activity_plans: {
       title: "활동 계획",
-      subtitle: "2026학년도 ESC에서 진행할 동아리 활동입니다.",
+      subtitle: "{year}학년도 ESC에서 진행할 동아리 활동입니다.",
       items: [
         {
           title: "수학과학체험전",

@@ -45,11 +45,22 @@ assert.deepEqual(missing, []);
 
 const indexHtml = read("index.html");
 const markdownPosition = indexHtml.indexOf("assets/js/markdown.js");
+const yearPosition = indexHtml.indexOf("assets/js/year.js");
 assert.ok(markdownPosition >= 0);
+assert.ok(yearPosition >= 0);
+assert.ok(yearPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
 assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
+assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
+
+const adminHtml = read("admin.html");
+assert.ok(adminHtml.indexOf("assets/js/year.js") >= 0);
+assert.ok(
+  adminHtml.indexOf("assets/js/year.js") <
+    adminHtml.indexOf("assets/js/admin.js"),
+);
 
 const currentSiteSources = [
   indexHtml,

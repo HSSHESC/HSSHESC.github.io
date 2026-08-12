@@ -5,6 +5,7 @@
   const bucket = window.ESC_SUPABASE_CONFIG?.activityBucket;
   const siteAssetsBucket = window.ESC_SUPABASE_CONFIG?.siteAssetsBucket;
   const fallbackSiteContent = window.ESC_CONTENT?.site ?? {};
+  const year = window.ESC_YEAR;
   const maxImageSize = 6 * 1024 * 1024;
   const signedUrlLifetimeSeconds = 60 * 60;
   const allowedImageTypes = new Set([
@@ -156,7 +157,6 @@
     const normalized = clone(content ?? {});
     if (!isPlainObject(normalized.about)) {
       normalized.about = {};
-      return normalized;
     }
 
     if (typeof normalized.about.body_markdown !== "string") {
@@ -170,6 +170,14 @@
       normalized.about.plans_markdown = Array.isArray(normalized.about.plans)
         ? normalized.about.plans.map((item) => `- ${item}`).join("\n")
         : "";
+    }
+    normalized.about.body_markdown = year.normalizeYearTemplate(
+      normalized.about.body_markdown,
+    );
+    if (typeof normalized.activity_plans?.subtitle === "string") {
+      normalized.activity_plans.subtitle = year.normalizeYearTemplate(
+        normalized.activity_plans.subtitle,
+      );
     }
     delete normalized.about.paragraphs;
     delete normalized.about.plans;
