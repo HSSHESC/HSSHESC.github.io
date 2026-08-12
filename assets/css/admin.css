@@ -5,6 +5,9 @@
 }
 
 .admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
   padding: 0.85rem 0;
   color: #fff;
   background: #101827;
@@ -57,7 +60,7 @@
 
 .admin-message {
   position: sticky;
-  top: 1rem;
+  top: 5rem;
   z-index: 100;
   box-shadow: 0 8px 24px rgba(16, 24, 39, 0.1);
 }
@@ -190,7 +193,7 @@
 
 .activity-list-panel {
   position: sticky;
-  top: 1rem;
+  top: 5rem;
 }
 
 .admin-panel-title {
@@ -625,6 +628,10 @@
 
   .admin-main {
     padding-top: 1.5rem;
+  }
+
+  .admin-message {
+    position: static;
   }
 
   .admin-view-tabs {

@@ -850,7 +850,8 @@ a:hover {
   position: absolute;
   left: 50%;
   bottom: max(1rem, env(safe-area-inset-bottom));
-  width: min(820px, calc(100% - 2rem));
+  width: fit-content;
+  max-width: calc(100% - 2rem);
   padding: 0.85rem 1.1rem;
   display: flex;
   flex-direction: column;
@@ -861,17 +862,18 @@ a:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 14px;
   color: #fff;
-  background: rgba(8, 12, 22, 0.62);
+  background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) brightness(58%) saturate(125%);
+  backdrop-filter: blur(18px) brightness(58%) saturate(125%);
   text-align: center;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
 }
 
 .image-overlay-description {
-  max-width: 100%;
+  max-width: min(760px, calc(100vw - 4rem));
   color: #fff;
+  overflow-wrap: anywhere;
 }
 
 .image-overlay-count {
@@ -882,11 +884,16 @@ a:hover {
 @media (max-width: 767px) {
   .image-overlay-caption {
     bottom: max(0.5rem, env(safe-area-inset-bottom));
-    width: calc(100% - 1rem);
+    width: fit-content;
+    max-width: calc(100% - 1rem);
     max-height: 32vh;
     padding: 0.7rem 0.85rem;
     overflow-y: auto;
     border-radius: 12px;
+  }
+
+  .image-overlay-description {
+    max-width: calc(100vw - 2.7rem);
   }
 }
 
