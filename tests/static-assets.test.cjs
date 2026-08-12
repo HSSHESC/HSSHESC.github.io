@@ -57,6 +57,12 @@ assert.ok(
 );
 assert.ok(indexHtml.includes('id="activitySearch"'));
 assert.ok(indexHtml.includes('href="faq.html"'));
+assert.ok(
+  indexHtml.indexOf('id="navContact"') < indexHtml.indexOf('id="navFaq"'),
+);
+assert.ok(
+  indexHtml.indexOf('id="languageSwitch"') > indexHtml.indexOf("</footer>"),
+);
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
 assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
@@ -76,6 +82,9 @@ const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));
 assert.ok(faqHtml.includes("assets/js/faq.js"));
 assert.ok(faqHtml.includes('rel="canonical"'));
+assert.ok(
+  faqHtml.indexOf('id="languageSwitch"') > faqHtml.indexOf("</footer>"),
+);
 
 const currentSiteSources = [
   indexHtml,
