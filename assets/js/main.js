@@ -224,6 +224,22 @@
    */
   const portfolioItems = select("#portfolioItems");
   if (portfolioItems) {
+    const activityLabels = {
+      noImage: "등록된 이미지가 없습니다.",
+      previousImage: "이전 대표 이미지",
+      nextImage: "다음 대표 이미지",
+      pauseSlideshow: "자동 전환 일시정지",
+      playSlideshow: "자동 전환 재생",
+      openGallery: "활동 사진 크게 보기",
+      types: {
+        project: "프로젝트",
+        education: "교육",
+        festival: "축제",
+        exchange: "교류",
+        competition: "대회",
+        other: "기타",
+      },
+    };
     const initializePortfolio = async () => {
       let portfolioData = [];
       const getPortfolioImages = (item) => item.images ?? [];
@@ -241,9 +257,7 @@
           throw new Error("Supabase activity loader is unavailable.");
         }
 
-        portfolioData = (await window.ESC_ACTIVITIES.loadPublished()).map(
-          (item) => window.ESC_I18N.localizeActivity(item),
-        );
+        portfolioData = await window.ESC_ACTIVITIES.loadPublished();
       } catch (error) {
         console.error("Supabase 활동 데이터를 불러오지 못했습니다.", error);
         portfolioItems.innerHTML = `
@@ -270,8 +284,8 @@
           const title = escapeHtml(item.title);
           const activityType = escapeHtml(item.activityType ?? "other");
           const activityTypeLabel = escapeHtml(
-            window.ESC_I18N.labels().types[item.activityType] ??
-              window.ESC_I18N.labels().types.other,
+            activityLabels.types[item.activityType] ??
+              activityLabels.types.other,
           );
           const tags = Array.isArray(item.tags) ? item.tags : [];
           const tagsMarkup = tags.length
@@ -309,19 +323,19 @@
             : `
                         <div class="portfolio-image-empty">
                             <i class="bi bi-image" aria-hidden="true"></i>
-                            <span>${escapeHtml(window.ESC_I18N.labels().noImage)}</span>
+                            <span>${escapeHtml(activityLabels.noImage)}</span>
                         </div>
                     `;
           const controls =
             images.length > 1
               ? `
-                            <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().previousImage)}">
+                            <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="${escapeHtml(activityLabels.previousImage)}">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
-                            <button class="portfolio-slide-control portfolio-slide-next" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().nextImage)}">
+                            <button class="portfolio-slide-control portfolio-slide-next" type="button" aria-label="${escapeHtml(activityLabels.nextImage)}">
                                 <i class="bi bi-chevron-right"></i>
                             </button>
-                            <button class="portfolio-slide-control portfolio-slide-pause" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().pauseSlideshow)}" aria-pressed="false">
+                            <button class="portfolio-slide-control portfolio-slide-pause" type="button" aria-label="${escapeHtml(activityLabels.pauseSlideshow)}" aria-pressed="false">
                                 <i class="bi bi-pause-fill" aria-hidden="true"></i>
                             </button>
                             <div class="portfolio-slide-dots" aria-hidden="true">
@@ -354,7 +368,7 @@
                                 ${controls}
                                 ${
                                   images.length
-                                    ? `<button class="portfolio-open-gallery" type="button" aria-label="${escapeHtml(`${item.title}: ${window.ESC_I18N.labels().openGallery}`)}"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>`
+                                    ? `<button class="portfolio-open-gallery" type="button" aria-label="${escapeHtml(`${item.title}: ${activityLabels.openGallery}`)}"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>`
                                     : ""
                                 }
                             </div>
@@ -418,8 +432,8 @@
           pauseButton.setAttribute(
             "aria-label",
             paused
-              ? window.ESC_I18N.labels().playSlideshow
-              : window.ESC_I18N.labels().pauseSlideshow,
+              ? activityLabels.playSlideshow
+              : activityLabels.pauseSlideshow,
           );
           pauseButton.querySelector("i").className = `bi ${
             paused ? "bi-play-fill" : "bi-pause-fill"
@@ -591,7 +605,6 @@
     };
 
     initializePortfolio();
-    window.addEventListener("esc:languagechange", initializePortfolio);
   }
 
   /**

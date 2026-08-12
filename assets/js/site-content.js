@@ -5,7 +5,6 @@
   const fallbackContent = window.ESC_CONTENT?.site ?? {};
   const siteAssetsBucket = window.ESC_SUPABASE_CONFIG?.siteAssetsBucket;
   const year = window.ESC_YEAR;
-  const i18n = window.ESC_I18N;
 
   const isPlainObject = (value) =>
     value !== null && typeof value === "object" && !Array.isArray(value);
@@ -242,9 +241,7 @@
   };
 
   const applyContent = (content) => {
-    const localizedContent = i18n.localizeSite(content);
-    content = localizedContent;
-    document.documentElement.lang = i18n.getLocale();
+    document.documentElement.lang = "ko";
     document.title = content.meta?.title ?? "ESC";
     setMetaContent("description", content.meta?.description ?? "");
     setMetaContent("keywords", content.meta?.keywords ?? "");
@@ -300,7 +297,7 @@
     setText("#footerAdminLabel", content.footer?.admin_label);
     setText(".copyright-year", year.getCurrentKoreanYear());
 
-    window.ESC_CONTENT.site = localizedContent;
+    window.ESC_CONTENT.site = content;
     window.ESC_CONTENT.contacts = Array.isArray(content.contact?.items)
       ? content.contact.items.map(normalizeContact)
       : [];
@@ -351,10 +348,4 @@
     mergeContent,
   };
   window.ESC_SITE_CONTENT_READY = loadAndApply();
-
-  window.addEventListener("esc:languagechange", async () => {
-    const content = await window.ESC_SITE_CONTENT_READY;
-    applyContent(content);
-    applyAssets(content);
-  });
 })();

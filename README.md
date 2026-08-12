@@ -20,7 +20,6 @@ assets/js/year.js                  한국 시간 기준 연도 템플릿 처리
 assets/js/content.js               장애 시 사용할 전체 대체 콘텐츠
 assets/js/site-content.js          공개 페이지 문구 조회와 안전한 DOM 렌더링
 assets/js/main.js                  공개 화면 렌더링과 동작
-assets/js/i18n.js                  한국어·영어 콘텐츠 병합과 언어 상태
 assets/js/public-features.js       활동 검색·학년도·유형 필터
 assets/js/admin-features.js        미리보기, FAQ, 통계, 수정 이력·복원
 assets/js/faq.js                   FAQ 페이지와 FAQ 구조화 데이터
@@ -42,7 +41,7 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 - 활동 설명
 - 관련 링크와 아이콘
 - 공개 여부
-- 활동 유형, 검색 태그, 영문 활동명과 영문 설명
+- 활동 유형과 검색 태그
 - 여러 장의 활동 사진
 - 사진별 설명과 표시 순서
 - Markdown 형식의 활동 설명과 홈페이지 본문
@@ -50,10 +49,10 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 - 상단 메뉴와 첫 화면 문구
 - 동아리 소개와 활동 계획 카드
 - 동아리·학교 로고 업로드와 대체 설명
-- Contact 학교 로고 위 오버레이 색상
+- 연락처 학교 로고 위 오버레이 색상
 - 포트폴리오·연락처·푸터 문구
 - 이메일 또는 GitHub 유형의 연락처
-- 한국어·영어 홈페이지 문구와 FAQ
+- 홈페이지 문구와 FAQ
 - 저장 전 활동·홈페이지 문구 미리보기
 - 활동·페이지 문구의 수정 이력 확인과 복원
 - 관리자 전용 활동·사진·공개 상태·학년도 통계
@@ -72,8 +71,7 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 반환됩니다.
 
 공개 홈페이지의 활동 기록에서는 제목·설명·태그 검색, 학년도 필터, 활동 유형
-필터를 함께 사용할 수 있습니다. 상단 `EN/한국어` 버튼은 선택 언어를 브라우저에
-저장하며, 영문 값이 없는 기존 활동은 한국어를 안전한 대체값으로 표시합니다.
+필터를 함께 사용할 수 있습니다. 홈페이지와 관리자 화면은 한국어로 제공됩니다.
 FAQ는 https://hsshesc.github.io/faq.html 에서 확인합니다.
 
 ## 최초 관리자 계정 설정
@@ -119,8 +117,8 @@ where user_id = (
 - 공개 활동 사진에만 서명 URL을 발급하는 Storage 조회 정책
 - 두 버킷의 업로드·수정·삭제 관리자 정책
 - 기존 포트폴리오 활동 6개, 사진 12개와 홈페이지 전체 문구
-- 활동 분류·태그·영문 필드 및 관리자 전용 `content_revisions` 수정 이력
-- FAQ와 영문 홈페이지 콘텐츠
+- 활동 분류·태그 및 관리자 전용 `content_revisions` 수정 이력
+- FAQ 콘텐츠
 
 `assets/js/supabase-config.js`에는 브라우저에 공개해도 되는 프로젝트 URL과
 publishable key만 들어갑니다. `service_role` 키나 secret key는 절대 넣지
@@ -187,12 +185,10 @@ node --check .\assets\js\site-content.js
 node --check .\assets\js\activities.js
 node --check .\assets\js\admin.js
 node --check .\assets\js\main.js
-node --check .\assets\js\i18n.js
 node --check .\assets\js\public-features.js
 node --check .\assets\js\admin-features.js
 node .\tests\markdown.test.cjs
 node .\tests\year.test.cjs
-node .\tests\i18n.test.cjs
 node .\tests\static-assets.test.cjs
 node .\tests\supabase-public.test.cjs
 ```

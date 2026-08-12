@@ -82,7 +82,8 @@ runBrowserScript("assets/js/activities.js");
   assert.equal(siteContent.content.about.plans, undefined);
   assert.ok(Array.isArray(siteContent.content.activity_plans.items));
   assert.ok(Array.isArray(siteContent.content.faq.items));
-  assert.equal(typeof siteContent.content.translations.en.faq.title, "string");
+  assert.equal(siteContent.content.navigation.home, "홈");
+  assert.equal(siteContent.content.navigation.contact, "연락처");
   assert.ok(Array.isArray(siteContent.content.contact.items));
   assert.ok(
     siteContent.content.contact.items.every((item) =>

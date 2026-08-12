@@ -51,18 +51,14 @@ assert.ok(yearPosition >= 0);
 assert.ok(yearPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
-assert.ok(
-  indexHtml.indexOf("assets/js/i18n.js") <
-    indexHtml.indexOf("assets/js/site-content.js"),
-);
 assert.ok(indexHtml.includes('id="activitySearch"'));
 assert.ok(indexHtml.includes('href="faq.html"'));
 assert.ok(
   indexHtml.indexOf('id="navContact"') < indexHtml.indexOf('id="navFaq"'),
 );
-assert.ok(
-  indexHtml.indexOf('id="languageSwitch"') > indexHtml.indexOf("</footer>"),
-);
+assert.ok(!indexHtml.includes('id="languageSwitch"'));
+assert.ok(!indexHtml.includes("assets/js/i18n.js"));
+assert.ok(!indexHtml.includes('hreflang="en"'));
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
 assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
@@ -82,9 +78,13 @@ const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));
 assert.ok(faqHtml.includes("assets/js/faq.js"));
 assert.ok(faqHtml.includes('rel="canonical"'));
-assert.ok(
-  faqHtml.indexOf('id="languageSwitch"') > faqHtml.indexOf("</footer>"),
-);
+assert.ok(!faqHtml.includes('id="languageSwitch"'));
+assert.ok(!faqHtml.includes("assets/js/i18n.js"));
+assert.ok(!faqHtml.includes('hreflang="en"'));
+assert.ok(!adminHtml.includes("activityTitleEn"));
+assert.ok(!adminHtml.includes("activityDescriptionEn"));
+assert.ok(!adminHtml.includes("contentLocale"));
+assert.ok(!adminHtml.includes("faqTitleEn"));
 
 const currentSiteSources = [
   indexHtml,

@@ -226,18 +226,6 @@
                         required
                       />
                     </div>
-                    <div class="col-md-8">
-                      <label class="form-label" for="activityTitleEn"
-                        >활동명(영어)</label
-                      >
-                      <input
-                        class="form-control"
-                        id="activityTitleEn"
-                        type="text"
-                        maxlength="120"
-                        placeholder="선택 입력"
-                      />
-                    </div>
                     <div class="col-md-4">
                       <label class="form-label" for="activityTypeSelect"
                         >활동 유형</label
@@ -266,18 +254,6 @@
                         Markdown을 사용할 수 있습니다. 예: **굵게**,
                         [링크](https://example.com), 목록, 인용문, 코드
                       </div>
-                    </div>
-                    <div class="col-md-8">
-                      <label class="form-label" for="activityDescriptionEn"
-                        >활동 설명(영어)</label
-                      >
-                      <textarea
-                        class="form-control"
-                        id="activityDescriptionEn"
-                        maxlength="5000"
-                        rows="4"
-                        placeholder="선택 입력, Markdown 사용 가능"
-                      ></textarea>
                     </div>
                     <div class="col-md-4">
                       <label class="form-label" for="activityTags">태그</label>
@@ -418,13 +394,6 @@
                 저장한 내용은 공개 홈페이지의 제목, 소개, 활동 계획, 연락처와
                 푸터에 반영됩니다.
               </p>
-            </div>
-            <div class="content-locale-picker">
-              <label for="contentLocale">편집 언어</label>
-              <select class="form-select" id="contentLocale">
-                <option value="ko">한국어</option>
-                <option value="en">English</option>
-              </select>
             </div>
           </div>
 
@@ -601,7 +570,7 @@
                   </div>
                 </div>
                 <div class="col-sm-6 col-lg">
-                  <label class="form-label" for="navHomeText">Home 메뉴</label>
+                  <label class="form-label" for="navHomeText">홈 메뉴</label>
                   <input
                     type="text"
                     class="form-control"
@@ -611,9 +580,7 @@
                   />
                 </div>
                 <div class="col-sm-6 col-lg">
-                  <label class="form-label" for="navAboutText"
-                    >About 메뉴</label
-                  >
+                  <label class="form-label" for="navAboutText">소개 메뉴</label>
                   <input
                     type="text"
                     class="form-control"
@@ -624,7 +591,7 @@
                 </div>
                 <div class="col-sm-6 col-lg">
                   <label class="form-label" for="navActivitiesText"
-                    >Activities 메뉴</label
+                    >활동 계획 메뉴</label
                   >
                   <input
                     type="text"
@@ -636,7 +603,7 @@
                 </div>
                 <div class="col-sm-6 col-lg">
                   <label class="form-label" for="navPortfolioText"
-                    >Portfolio 메뉴</label
+                    >활동 기록 메뉴</label
                   >
                   <input
                     type="text"
@@ -648,7 +615,7 @@
                 </div>
                 <div class="col-sm-6 col-lg">
                   <label class="form-label" for="navContactText"
-                    >Contact 메뉴</label
+                    >연락처 메뉴</label
                   >
                   <input
                     type="text"
@@ -914,7 +881,7 @@
                       id="contactOverlayColor"
                       type="color"
                       value="#8b5cf6"
-                      title="Contact 배경색 선택"
+                      title="연락처 배경색 선택"
                     />
                     <output
                       id="contactOverlayColorValue"
@@ -924,7 +891,7 @@
                     </output>
                   </div>
                   <div class="form-text">
-                    Contact 영역에서 학교 로고 사진 위에 반투명하게 표시됩니다.
+                    연락처 영역에서 학교 로고 사진 위에 반투명하게 표시됩니다.
                   </div>
                 </div>
               </div>
@@ -1043,7 +1010,7 @@
             <div class="admin-panel-title"><h3>FAQ 편집</h3></div>
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label" for="faqTitleKo">제목(한국어)</label>
+                <label class="form-label" for="faqTitleKo">제목</label>
                 <input
                   class="form-control"
                   id="faqTitleKo"
@@ -1052,34 +1019,10 @@
                 />
               </div>
               <div class="col-md-6">
-                <label class="form-label" for="faqTitleEn"
-                  >Title (English)</label
-                >
-                <input
-                  class="form-control"
-                  id="faqTitleEn"
-                  type="text"
-                  maxlength="100"
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="faqSubtitleKo"
-                  >설명(한국어)</label
-                >
+                <label class="form-label" for="faqSubtitleKo">설명</label>
                 <input
                   class="form-control"
                   id="faqSubtitleKo"
-                  type="text"
-                  maxlength="240"
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="faqSubtitleEn"
-                  >Description (English)</label
-                >
-                <input
-                  class="form-control"
-                  id="faqSubtitleEn"
                   type="text"
                   maxlength="240"
                 />
@@ -1151,7 +1094,6 @@
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/year.js"></script>
-    <script src="assets/js/i18n.js"></script>
     <script src="assets/js/content.js"></script>
     <script src="assets/js/markdown.js"></script>
     <script src="assets/js/admin.js"></script>

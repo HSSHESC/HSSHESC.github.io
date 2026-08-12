@@ -42,7 +42,6 @@
     activityCount: document.querySelector("#activityCount"),
     activityDate: document.querySelector("#activityDate"),
     activityDescription: document.querySelector("#activityDescription"),
-    activityDescriptionEn: document.querySelector("#activityDescriptionEn"),
     activityForm: document.querySelector("#activityForm"),
     activityIcon: document.querySelector("#activityIcon"),
     activityIconPreview: document.querySelector("#activityIconPreview"),
@@ -51,7 +50,6 @@
     activityPublished: document.querySelector("#activityPublished"),
     activityTags: document.querySelector("#activityTags"),
     activityTitle: document.querySelector("#activityTitle"),
-    activityTitleEn: document.querySelector("#activityTitleEn"),
     activityTypeSelect: document.querySelector("#activityTypeSelect"),
     activityUrl: document.querySelector("#activityUrl"),
     activityViewTab: document.querySelector("#activityViewTab"),
@@ -69,7 +67,6 @@
       "#contactOverlayColorValue",
     ),
     contactTitleText: document.querySelector("#contactTitleText"),
-    contentLocale: document.querySelector("#contentLocale"),
     clubLogoAlt: document.querySelector("#clubLogoAlt"),
     clubLogoFile: document.querySelector("#clubLogoFile"),
     clubLogoPreview: document.querySelector("#clubLogoPreview"),
@@ -131,7 +128,6 @@
     logoFiles: { club: null, school: null },
     logoPreviewUrls: { club: null, school: null },
     removeLogos: { club: false, school: false },
-    contentLocale: "ko",
   };
 
   const isPlainObject = (value) =>
@@ -856,16 +852,7 @@
   };
 
   const renderSiteContentForm = () => {
-    const baseContent = state.siteContent ?? fallbackSiteContent;
-    const content =
-      state.contentLocale === "en"
-        ? mergeContent(
-            baseContent,
-            baseContent.translations?.en ??
-              fallbackSiteContent.translations?.en ??
-              {},
-          )
-        : baseContent;
+    const content = state.siteContent ?? fallbackSiteContent;
     elements.siteMetaTitle.value = content.meta?.title ?? "";
     elements.siteMetaDescription.value = content.meta?.description ?? "";
     elements.siteMetaKeywords.value = content.meta?.keywords ?? "";
@@ -1148,12 +1135,8 @@
           sectionContent.branding[logoFields[kind].pathKey] = path;
         }
       }
-      const contentPatch =
-        state.contentLocale === "en"
-          ? { translations: { en: sectionContent } }
-          : sectionContent;
       const nextContent = normalizeSiteContent(
-        mergeContent(state.siteContent ?? fallbackSiteContent, contentPatch),
+        mergeContent(state.siteContent ?? fallbackSiteContent, sectionContent),
       );
       const { data, error } = await client
         .from("site_content")
@@ -1265,10 +1248,8 @@
     elements.newPhotos.value = "";
     elements.activityId.value = activity.id;
     elements.activityTitle.value = activity.title;
-    elements.activityTitleEn.value = activity.title_en ?? "";
     elements.activityDate.value = activity.activity_date;
     elements.activityDescription.value = activity.description;
-    elements.activityDescriptionEn.value = activity.description_en ?? "";
     elements.activityTypeSelect.value = activity.activity_type ?? "other";
     elements.activityTags.value = Array.isArray(activity.tags)
       ? activity.tags.join(", ")
@@ -1290,7 +1271,7 @@
       client
         .from("activities")
         .select(
-          "id,title,title_en,description,description_en,activity_date,external_url,icon,is_published,activity_type,tags,created_by,created_at,updated_at",
+          "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags,created_by,created_at,updated_at",
         )
         .order("activity_date", { ascending: false })
         .order("created_at", { ascending: false }),
@@ -1544,7 +1525,6 @@
       const payload = {
         activity_date: elements.activityDate.value,
         description: elements.activityDescription.value.trim(),
-        description_en: elements.activityDescriptionEn.value.trim() || null,
         external_url: elements.activityUrl.value.trim() || null,
         icon: elements.activityIcon.value,
         is_published: elements.activityPublished.checked,
@@ -1558,7 +1538,6 @@
           ),
         ].slice(0, 12),
         title,
-        title_en: elements.activityTitleEn.value.trim() || null,
       };
 
       let saveResult;
@@ -1832,10 +1811,6 @@
   elements.siteContentViewTab.addEventListener("click", () => {
     clearMessage();
     activateAdminView("content");
-  });
-  elements.contentLocale.addEventListener("change", () => {
-    state.contentLocale = elements.contentLocale.value;
-    renderSiteContentForm();
   });
   elements.addServiceItemButton.addEventListener("click", () => {
     appendServiceContentItem({

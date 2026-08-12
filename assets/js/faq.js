@@ -2,33 +2,21 @@
   "use strict";
 
   const faqList = document.querySelector("#faqList");
-  const languageSwitch = document.querySelector("#languageSwitch");
 
   const renderFaq = async () => {
-    const rawContent = await window.ESC_SITE_CONTENT_READY;
-    const content = window.ESC_I18N.localizeSite(rawContent);
+    const content = await window.ESC_SITE_CONTENT_READY;
     const faq = content.faq ?? {};
     document.title = `${faq.title ?? "FAQ"} | ESC`;
     document.querySelector("#faqTitle").textContent = faq.title ?? "FAQ";
     document.querySelector("#faqSubtitle").textContent = faq.subtitle ?? "";
-    document.querySelector("#faqHomeLink").textContent =
-      window.ESC_I18N.getLocale() === "ko" ? "홈으로" : "Home";
-    languageSwitch.textContent =
-      window.ESC_I18N.getLocale() === "ko" ? "EN" : "한국어";
-    languageSwitch.setAttribute(
-      "aria-label",
-      window.ESC_I18N.getLocale() === "ko" ? "영어로 보기" : "View in Korean",
-    );
+    document.querySelector("#faqHomeLink").textContent = "홈으로";
 
     const items = Array.isArray(faq.items) ? faq.items : [];
     faqList.replaceChildren();
     if (!items.length) {
       const empty = document.createElement("p");
       empty.className = "faq-empty";
-      empty.textContent =
-        window.ESC_I18N.getLocale() === "ko"
-          ? "등록된 질문이 없습니다."
-          : "No questions have been added yet.";
+      empty.textContent = "등록된 질문이 없습니다.";
       faqList.append(empty);
       return;
     }
@@ -67,11 +55,5 @@
     document.head.append(schema);
   };
 
-  languageSwitch.addEventListener("click", () => {
-    window.ESC_I18N.setLocale(
-      window.ESC_I18N.getLocale() === "ko" ? "en" : "ko",
-    );
-  });
-  window.addEventListener("esc:languagechange", renderFaq);
   renderFaq();
 })();
