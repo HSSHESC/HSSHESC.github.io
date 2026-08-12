@@ -325,14 +325,6 @@ a:hover {
 #header .site-brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-}
-
-#header .logo img {
-  max-height: 40px;
-  max-width: 56px;
-  border-radius: 8px;
-  object-fit: contain;
 }
 
 #header.header-scrolled {

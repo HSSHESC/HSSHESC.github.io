@@ -49,6 +49,7 @@ assert.ok(markdownPosition >= 0);
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
+assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 
 const currentSiteSources = [
   indexHtml,
