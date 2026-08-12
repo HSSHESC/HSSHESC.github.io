@@ -53,7 +53,7 @@
     const { data: activities, error: activitiesError } = await client
       .from("activities")
       .select(
-        "id,title,title_en,description,description_en,activity_date,external_url,icon,is_published,activity_type,tags",
+        "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags",
       )
       .eq("is_published", true)
       .order("activity_date", { ascending: false })
@@ -94,9 +94,7 @@
       return {
         id: activity.id,
         title: activity.title,
-        title_en: activity.title_en,
         description: activity.description,
-        description_en: activity.description_en,
         date: activity.activity_date,
         href: activity.external_url,
         icon: activity.icon,

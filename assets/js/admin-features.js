@@ -52,25 +52,17 @@
     }),
   );
 
-  const createFaqRow = (ko = {}, en = {}) => {
+  const createFaqRow = (item = {}) => {
     const row = document.createElement("div");
     row.className = "faq-admin-row";
     row.innerHTML = `
       <div>
-        <label class="form-label">질문(한국어)</label>
-        <input class="form-control faq-question-ko" type="text" maxlength="300" value="${escapeHtml(ko.question)}" />
+        <label class="form-label">질문</label>
+        <input class="form-control faq-question-ko" type="text" maxlength="300" value="${escapeHtml(item.question)}" />
       </div>
       <div>
-        <label class="form-label">Question (English)</label>
-        <input class="form-control faq-question-en" type="text" maxlength="300" value="${escapeHtml(en.question)}" />
-      </div>
-      <div>
-        <label class="form-label">답변(한국어, Markdown)</label>
-        <textarea class="form-control faq-answer-ko" maxlength="5000" rows="4">${escapeHtml(ko.answer)}</textarea>
-      </div>
-      <div>
-        <label class="form-label">Answer (English, Markdown)</label>
-        <textarea class="form-control faq-answer-en" maxlength="5000" rows="4">${escapeHtml(en.answer)}</textarea>
+        <label class="form-label">답변(Markdown)</label>
+        <textarea class="form-control faq-answer-ko" maxlength="5000" rows="4">${escapeHtml(item.answer)}</textarea>
       </div>
       <button class="btn btn-sm btn-outline-danger faq-remove" type="button">질문 삭제</button>
     `;
@@ -91,51 +83,32 @@
     }
     faqContent = data.content;
     const ko = faqContent.faq ?? {};
-    const en = faqContent.translations?.en?.faq ?? {};
     document.querySelector("#faqTitleKo").value = ko.title ?? "";
     document.querySelector("#faqSubtitleKo").value = ko.subtitle ?? "";
-    document.querySelector("#faqTitleEn").value = en.title ?? "";
-    document.querySelector("#faqSubtitleEn").value = en.subtitle ?? "";
     faqItems.replaceChildren();
-    const count = Math.max(ko.items?.length ?? 0, en.items?.length ?? 0);
-    for (let index = 0; index < count; index += 1) {
-      createFaqRow(ko.items?.[index], en.items?.[index]);
-    }
+    (ko.items ?? []).forEach((item) => createFaqRow(item));
   };
 
   const readFaqRows = () => {
     const rows = [...faqItems.querySelectorAll(".faq-admin-row")];
-    const mapLocale = (locale) =>
-      rows
-        .map((row) => ({
-          question: row.querySelector(`.faq-question-${locale}`).value.trim(),
-          answer: row.querySelector(`.faq-answer-${locale}`).value.trim(),
-        }))
-        .filter((item) => item.question || item.answer);
-    return { ko: mapLocale("ko"), en: mapLocale("en") };
+    return rows
+      .map((row) => ({
+        question: row.querySelector(".faq-question-ko").value.trim(),
+        answer: row.querySelector(".faq-answer-ko").value.trim(),
+      }))
+      .filter((item) => item.question || item.answer);
   };
 
   const saveFaq = async () => {
     if (!currentUser || !faqContent) {
       return;
     }
-    const items = readFaqRows();
-    const nextContent = window.ESC_I18N.merge(faqContent, {
-      faq: {
-        title: document.querySelector("#faqTitleKo").value.trim(),
-        subtitle: document.querySelector("#faqSubtitleKo").value.trim(),
-        items: items.ko,
-      },
-      translations: {
-        en: {
-          faq: {
-            title: document.querySelector("#faqTitleEn").value.trim(),
-            subtitle: document.querySelector("#faqSubtitleEn").value.trim(),
-            items: items.en,
-          },
-        },
-      },
-    });
+    const nextContent = JSON.parse(JSON.stringify(faqContent));
+    nextContent.faq = {
+      title: document.querySelector("#faqTitleKo").value.trim(),
+      subtitle: document.querySelector("#faqSubtitleKo").value.trim(),
+      items: readFaqRows(),
+    };
     const { error } = await client
       .from("site_content")
       .update({ content: nextContent, updated_by: currentUser.id })
@@ -242,9 +215,7 @@
     }
     const allowed = [
       "title",
-      "title_en",
       "description",
-      "description_en",
       "activity_date",
       "external_url",
       "icon",
@@ -290,7 +261,7 @@
       : escapeHtml(about);
     showPreview(
       "홈페이지 문구 미리보기",
-      `<div class="admin-site-preview"><h1>${escapeHtml(hero)}</h1><h2>${escapeHtml(title)}</h2><div class="markdown-content">${aboutHtml}</div><p>활동 계획: ${escapeHtml(document.querySelector("#servicesSubtitleText").value)}</p><p>Contact: ${escapeHtml(document.querySelector("#contactIntroText").value)}</p></div>`,
+      `<div class="admin-site-preview"><h1>${escapeHtml(hero)}</h1><h2>${escapeHtml(title)}</h2><div class="markdown-content">${aboutHtml}</div><p>활동 계획: ${escapeHtml(document.querySelector("#servicesSubtitleText").value)}</p><p>연락처: ${escapeHtml(document.querySelector("#contactIntroText").value)}</p></div>`,
     );
   };
 
