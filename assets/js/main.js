@@ -284,7 +284,8 @@
           const title = escapeHtml(item.title);
           const activityType = escapeHtml(item.activityType ?? "other");
           const activityTypeLabel = escapeHtml(
-            activityLabels.types[item.activityType] ??
+            item.activityTypeLabel ??
+              activityLabels.types[item.activityType] ??
               activityLabels.types.other,
           );
           const tags = Array.isArray(item.tags) ? item.tags : [];
@@ -352,6 +353,7 @@
                             data-has-images="${images.length > 0}"
                             data-year="${escapeHtml(String(item.date).slice(0, 4))}"
                             data-type="${activityType}"
+                            data-type-label="${activityTypeLabel}"
                             data-search="${escapeHtml(
                               [item.title, item.description, ...tags]
                                 .join(" ")

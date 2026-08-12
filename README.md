@@ -25,7 +25,7 @@ assets/js/content.js               장애 시 사용할 전체 대체 콘텐츠
 assets/js/site-content.js          공개 페이지 문구 조회와 안전한 DOM 렌더링
 assets/js/main.js                  공개 화면 렌더링과 동작
 assets/js/public-features.js       활동 검색·학년도·유형 필터
-assets/js/admin-features.js        활동 미리보기, FAQ, 통계, 수정 이력·복원
+assets/js/admin-features.js        FAQ, 통계, 수정 이력·복원
 assets/js/faq.js                   FAQ 페이지와 FAQ 구조화 데이터
 faq.html                           공개 FAQ 페이지
 robots.txt, sitemap.xml            검색 엔진 수집·페이지 발견 설정
@@ -44,7 +44,7 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 - 활동 설명
 - 관련 링크와 아이콘
 - 공개 여부
-- 활동 유형과 검색 태그
+- 활동 유형의 추가·선택과 검색 태그
 - 여러 장의 활동 사진
 - 사진별 설명과 표시 순서
 - Markdown 형식의 활동 설명과 홈페이지 본문
@@ -56,7 +56,6 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 - 포트폴리오·연락처·푸터 문구
 - 이메일 또는 GitHub 유형의 연락처
 - 홈페이지 문구와 FAQ
-- 저장 전 활동·홈페이지 문구 미리보기
 - 활동·페이지 문구의 수정 이력 확인과 복원
 - 관리자 전용 활동·사진·공개 상태·학년도 통계
 
@@ -116,7 +115,7 @@ where user_id = (
 
 마이그레이션은 다음 항목을 구성합니다.
 
-- `activities`, `activity_photos`, `site_content`, `site_admins` 테이블
+- `activities`, `activity_types`, `activity_photos`, `site_content`, `site_admins` 테이블
 - 공개 읽기와 관리자 쓰기를 분리한 RLS 정책
 - 명시적인 Data API `GRANT`
 - 6 MiB 이미지 제한이 적용된 비공개 `activity-images` 버킷

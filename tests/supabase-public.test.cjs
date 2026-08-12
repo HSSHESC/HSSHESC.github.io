@@ -70,9 +70,15 @@ runBrowserScript("assets/js/activities.js");
       .order("storage_path");
   const { data: publicRevisions, error: publicRevisionsError } =
     await context.ESC_SUPABASE.from("content_revisions").select("id");
+  const { data: activityTypes, error: activityTypesError } =
+    await context.ESC_SUPABASE.from("activity_types")
+      .select("slug,label,display_order")
+      .order("display_order")
+      .order("label");
 
   assert.ifError(siteContentError);
   assert.ifError(photoRowsError);
+  assert.ifError(activityTypesError);
   assert.ok(publicRevisionsError || publicRevisions.length === 0);
   assert.equal(siteContent.id, "home");
   assert.equal(typeof siteContent.content.about.title, "string");
@@ -137,16 +143,29 @@ runBrowserScript("assets/js/activities.js");
 
   assert.ok(activities.length > 0);
   assert.ok(activities.every((activity) => activity.title));
+  const activityTypeLabels = new Map(
+    activityTypes.map((activityType) => [
+      activityType.slug,
+      activityType.label,
+    ]),
+  );
+  assert.deepEqual(
+    Array.from(activityTypeLabels.entries()).slice(0, 6),
+    [
+      ["project", "프로젝트"],
+      ["education", "교육"],
+      ["festival", "축제"],
+      ["exchange", "교류"],
+      ["competition", "대회"],
+      ["other", "기타"],
+    ],
+  );
   assert.ok(
-    activities.every((activity) =>
-      [
-        "project",
-        "education",
-        "festival",
-        "exchange",
-        "competition",
-        "other",
-      ].includes(activity.activityType),
+    activities.every(
+      (activity) =>
+        activityTypeLabels.has(activity.activityType) &&
+        activity.activityTypeLabel ===
+          activityTypeLabels.get(activity.activityType),
     ),
   );
   assert.ok(activities.every((activity) => Array.isArray(activity.tags)));

@@ -445,6 +445,17 @@
   box-shadow: 0 0 0 0.2rem rgba(0, 74, 173, 0.13);
 }
 
+.activity-type-add-row {
+  margin-top: 0.55rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+}
+
+.activity-type-add-row .btn {
+  white-space: nowrap;
+}
+
 .admin-divider {
   margin: 2rem 0;
   border-color: #dfe4ea;
