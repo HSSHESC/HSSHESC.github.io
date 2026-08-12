@@ -306,6 +306,35 @@ a:hover {
   opacity: 1;
 }
 
+.floating-page-actions {
+  position: fixed;
+  right: 15px;
+  bottom: max(15px, env(safe-area-inset-bottom));
+  z-index: 996;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.floating-page-actions .back-to-top {
+  position: static;
+}
+
+.floating-language-switch {
+  min-height: 40px;
+  padding: 0.35rem 0.8rem;
+  color: #1e1e1e;
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+}
+
+.floating-language-switch:hover {
+  color: #fff;
+  background: var(--secondary);
+  border-color: var(--secondary);
+}
+
 /*--------------------------------------------------------------
 # Header
 --------------------------------------------------------------*/
@@ -379,10 +408,6 @@ a:hover {
 .navbar > ul > li {
   white-space: nowrap;
   padding: 10px 0 10px 30px;
-}
-
-.language-switch-item {
-  padding-left: 20px !important;
 }
 
 .language-switch {
