@@ -88,7 +88,17 @@ assert.ok(faqHtml.includes("assets/js/faq.js"));
 assert.ok(faqHtml.includes('rel="canonical"'));
 const extractFooter = (source) =>
   source.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
-assert.equal(extractFooter(faqHtml), extractFooter(indexHtml));
+const normalizeFooter = (source) =>
+  source
+    ?.replace(/<div class="footer-admin-link">[\s\S]*?<\/div>/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+assert.equal(
+  normalizeFooter(extractFooter(faqHtml)),
+  normalizeFooter(extractFooter(indexHtml)),
+);
+assert.ok(!extractFooter(faqHtml)?.includes('class="footer-admin-link"'));
+assert.ok(extractFooter(indexHtml)?.includes('class="footer-admin-link"'));
 assert.ok(!faqHtml.includes('id="languageSwitch"'));
 assert.ok(!faqHtml.includes("assets/js/i18n.js"));
 assert.ok(!faqHtml.includes('hreflang="en"'));
