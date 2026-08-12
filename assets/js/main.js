@@ -542,12 +542,4 @@
         contactSocials.append(row);
       });
   }
-
-  /**
-   * Copyright year
-   */
-  const copyrightYear = select(".copyright-year");
-  if (copyrightYear) {
-    copyrightYear.textContent = new Date().getFullYear();
-  }
 })();

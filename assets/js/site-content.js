@@ -4,6 +4,7 @@
   const client = window.ESC_SUPABASE;
   const fallbackContent = window.ESC_CONTENT?.site ?? {};
   const siteAssetsBucket = window.ESC_SUPABASE_CONFIG?.siteAssetsBucket;
+  const year = window.ESC_YEAR;
 
   const isPlainObject = (value) =>
     value !== null && typeof value === "object" && !Array.isArray(value);
@@ -87,7 +88,11 @@
         typeof about.body_markdown === "string"
           ? about.body_markdown
           : (about.paragraphs ?? []).join("\n\n");
-      appendMarkdown(paragraphContainer, bodyMarkdown, about.school_url);
+      appendMarkdown(
+        paragraphContainer,
+        year.renderYearTemplate(bodyMarkdown),
+        about.school_url,
+      );
     }
 
     if (planList) {
@@ -262,7 +267,10 @@
     setText("#aboutTitle", content.about?.title);
     renderAbout(content.about ?? {});
     setText("#servicesTitle", content.activity_plans?.title);
-    setText("#servicesSubtitle", content.activity_plans?.subtitle);
+    setText(
+      "#servicesSubtitle",
+      year.renderYearTemplate(content.activity_plans?.subtitle),
+    );
     renderActivityPlans(
       content.activity_plans ?? {},
       content.about?.school_url,
@@ -276,6 +284,7 @@
     setText("#footerCopyrightName", content.footer?.copyright_name);
     setText("#footerRights", content.footer?.rights_text);
     setText("#footerAdminLabel", content.footer?.admin_label);
+    setText(".copyright-year", year.getCurrentKoreanYear());
 
     window.ESC_CONTENT.site = content;
     window.ESC_CONTENT.contacts = Array.isArray(content.contact?.items)

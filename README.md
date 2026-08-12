@@ -16,6 +16,7 @@ assets/js/admin.js                 관리자 로그인, 활동·사진·페이�
 assets/js/markdown.js              사용자 입력 Markdown의 안전한 렌더링
 assets/js/supabase-config.js       공개 가능한 Supabase 접속 설정
 assets/js/supabase-client.js       Supabase 브라우저 클라이언트
+assets/js/year.js                  한국 시간 기준 연도 템플릿 처리
 assets/js/content.js               장애 시 사용할 전체 대체 콘텐츠
 assets/js/site-content.js          공개 페이지 문구 조회와 안전한 DOM 렌더링
 assets/js/main.js                  공개 화면 렌더링과 동작
@@ -50,6 +51,8 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 별도의 저장 버튼을 제공합니다. 이메일 연락처는 입력한 주소에서 `mailto:` 링크를
 자동으로 만들고, GitHub 연락처는 표시 이름과 프로필 링크를 각각 저장합니다.
 아이콘 선택란에는 현재 아이콘의 모양과 이름을 함께 표시합니다.
+학년도 문구에서 `{year}`를 사용하면 한국 시간 기준 현재 연도로 자동 표시되며,
+푸터의 저작권 연도도 같은 기준으로 매년 갱신됩니다.
 
 활동, 사진 설명과 페이지 문구는 Supabase Postgres에 저장됩니다. 기존 활동 사진
 12개와 새 사진 파일은 모두 비공개 `activity-images` Storage 버킷에 저장됩니다.
