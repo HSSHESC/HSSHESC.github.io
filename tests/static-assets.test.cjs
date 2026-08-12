@@ -83,6 +83,13 @@ assert.ok(adminHtml.includes('id="revisionList"'));
 assert.ok(adminHtml.includes('id="adminStats"'));
 assert.ok(adminHtml.includes('id="adminEmail"'));
 assert.ok(adminHtml.includes('href="account.html"'));
+assert.ok(adminHtml.includes("assets/js/password-visibility.js"));
+assert.ok(!adminHtml.includes('id="previewSiteButton"'));
+assert.equal((adminHtml.match(/type="password"/g) ?? []).length, 1);
+assert.ok(
+  adminHtml.indexOf("assets/js/password-visibility.js") <
+    adminHtml.indexOf("assets/js/admin.js"),
+);
 
 const accountHtml = read("account.html");
 assert.ok(accountHtml.includes('id="currentPassword"'));
@@ -91,9 +98,15 @@ assert.ok(accountHtml.includes('id="newPasswordConfirm"'));
 assert.ok(accountHtml.includes('id="passwordStrengthMeter"'));
 assert.ok(accountHtml.includes('role="progressbar"'));
 assert.ok(accountHtml.includes("assets/js/password-strength.js"));
+assert.ok(accountHtml.includes("assets/js/password-visibility.js"));
 assert.ok(accountHtml.includes("assets/js/account.js"));
+assert.equal((accountHtml.match(/type="password"/g) ?? []).length, 3);
 assert.ok(
   accountHtml.indexOf("assets/js/password-strength.js") <
+    accountHtml.indexOf("assets/js/account.js"),
+);
+assert.ok(
+  accountHtml.indexOf("assets/js/password-visibility.js") <
     accountHtml.indexOf("assets/js/account.js"),
 );
 const accountScript = read("assets/js/account.js");
@@ -101,6 +114,9 @@ assert.ok(accountScript.includes("signInWithPassword"));
 assert.ok(accountScript.includes("updateUser"));
 assert.ok(accountScript.includes("current_password"));
 assert.ok(accountScript.includes('from("site_admins")'));
+const adminFeaturesScript = read("assets/js/admin-features.js");
+assert.ok(!adminFeaturesScript.includes("previewSite"));
+assert.ok(!adminFeaturesScript.includes("admin-site-preview"));
 
 const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));

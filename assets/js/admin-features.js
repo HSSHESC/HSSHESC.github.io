@@ -252,19 +252,6 @@
     );
   };
 
-  const previewSite = () => {
-    const title = document.querySelector("#siteMetaTitle").value || "ESC";
-    const hero = document.querySelector("#heroTitleText").value || "ESC";
-    const about = document.querySelector("#aboutParagraphs").value;
-    const aboutHtml = window.ESC_MARKDOWN
-      ? window.ESC_MARKDOWN.toHtml(about)
-      : escapeHtml(about);
-    showPreview(
-      "홈페이지 문구 미리보기",
-      `<div class="admin-site-preview"><h1>${escapeHtml(hero)}</h1><h2>${escapeHtml(title)}</h2><div class="markdown-content">${aboutHtml}</div><p>활동 계획: ${escapeHtml(document.querySelector("#servicesSubtitleText").value)}</p><p>연락처: ${escapeHtml(document.querySelector("#contactIntroText").value)}</p></div>`,
-    );
-  };
-
   toolsTab.addEventListener("click", () => {
     activateTools().catch((error) => {
       console.error("운영 도구를 불러오지 못했습니다.", error);
@@ -288,9 +275,6 @@
   document
     .querySelector("#previewActivityButton")
     .addEventListener("click", previewActivity);
-  document
-    .querySelector("#previewSiteButton")
-    .addEventListener("click", previewSite);
   document
     .querySelector("#closePreviewButton")
     .addEventListener("click", () => previewDialog.close());

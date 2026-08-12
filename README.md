@@ -15,6 +15,7 @@ assets/css/admin.css               관리자 화면 디자인
 assets/js/activities.js            공개 활동 데이터 조회
 assets/js/admin.js                 관리자 로그인, 활동·사진·페이지 문구 CRUD
 assets/js/account.js               관리자 권한 확인 및 비밀번호 변경
+assets/js/password-visibility.js   모든 관리자 비밀번호 입력 표시·숨기기
 assets/js/password-strength.js     비밀번호 보안 강도 안내 척도
 assets/js/markdown.js              사용자 입력 Markdown의 안전한 렌더링
 assets/js/supabase-config.js       공개 가능한 Supabase 접속 설정
@@ -24,7 +25,7 @@ assets/js/content.js               장애 시 사용할 전체 대체 콘텐츠
 assets/js/site-content.js          공개 페이지 문구 조회와 안전한 DOM 렌더링
 assets/js/main.js                  공개 화면 렌더링과 동작
 assets/js/public-features.js       활동 검색·학년도·유형 필터
-assets/js/admin-features.js        미리보기, FAQ, 통계, 수정 이력·복원
+assets/js/admin-features.js        활동 미리보기, FAQ, 통계, 수정 이력·복원
 assets/js/faq.js                   FAQ 페이지와 FAQ 구조화 데이터
 faq.html                           공개 FAQ 페이지
 robots.txt, sitemap.xml            검색 엔진 수집·페이지 발견 설정
@@ -193,6 +194,7 @@ node --check .\assets\js\site-content.js
 node --check .\assets\js\activities.js
 node --check .\assets\js\admin.js
 node --check .\assets\js\account.js
+node --check .\assets\js\password-visibility.js
 node --check .\assets\js\password-strength.js
 node --check .\assets\js\main.js
 node --check .\assets\js\public-features.js
@@ -201,6 +203,7 @@ node .\tests\markdown.test.cjs
 node .\tests\year.test.cjs
 node .\tests\static-assets.test.cjs
 node .\tests\password-strength.test.cjs
+node .\tests\password-visibility.test.cjs
 node .\tests\account.test.cjs
 node .\tests\supabase-public.test.cjs
 ```
