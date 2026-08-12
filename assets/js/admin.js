@@ -152,6 +152,30 @@
     return result;
   };
 
+  const normalizeSiteContent = (content) => {
+    const normalized = clone(content ?? {});
+    if (!isPlainObject(normalized.about)) {
+      normalized.about = {};
+      return normalized;
+    }
+
+    if (typeof normalized.about.body_markdown !== "string") {
+      normalized.about.body_markdown = Array.isArray(
+        normalized.about.paragraphs,
+      )
+        ? normalized.about.paragraphs.join("\n\n")
+        : "";
+    }
+    if (typeof normalized.about.plans_markdown !== "string") {
+      normalized.about.plans_markdown = Array.isArray(normalized.about.plans)
+        ? normalized.about.plans.map((item) => `- ${item}`).join("\n")
+        : "";
+    }
+    delete normalized.about.paragraphs;
+    delete normalized.about.plans;
+    return normalized;
+  };
+
   const splitLines = (value) =>
     value
       .split(/\r?\n/)
@@ -1031,7 +1055,9 @@
       throw error;
     }
 
-    state.siteContent = mergeContent(fallbackSiteContent, data?.content ?? {});
+    state.siteContent = normalizeSiteContent(
+      mergeContent(fallbackSiteContent, data?.content ?? {}),
+    );
     renderSiteContentForm();
   };
 
@@ -1098,9 +1124,8 @@
           sectionContent.branding[logoFields[kind].pathKey] = path;
         }
       }
-      const nextContent = mergeContent(
-        state.siteContent ?? fallbackSiteContent,
-        sectionContent,
+      const nextContent = normalizeSiteContent(
+        mergeContent(state.siteContent ?? fallbackSiteContent, sectionContent),
       );
       const { data, error } = await client
         .from("site_content")
@@ -1114,7 +1139,9 @@
         throw error;
       }
 
-      state.siteContent = mergeContent(fallbackSiteContent, data.content);
+      state.siteContent = normalizeSiteContent(
+        mergeContent(fallbackSiteContent, data.content),
+      );
       let cleanupWarning = false;
       if (sectionName === "basics") {
         const pathsToRemove = Object.entries(logoFields).flatMap(
