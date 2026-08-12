@@ -9,9 +9,9 @@ window.ESC_CONTENT = {
     },
     brand: "ESC",
     branding: {
-      club_logo_storage_path: null,
+      club_logo_storage_path: "branding/club-logo.png",
       club_logo_alt: "ESC 동아리 로고",
-      school_logo_storage_path: null,
+      school_logo_storage_path: "branding/school-logo.jpg",
       school_logo_alt: "한성과학고등학교 로고",
     },
     appearance: {

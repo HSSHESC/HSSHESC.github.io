@@ -25,7 +25,6 @@ assets/js/admin-features.js        미리보기, FAQ, 통계, 수정 이력·복
 assets/js/faq.js                   FAQ 페이지와 FAQ 구조화 데이터
 faq.html                           공개 FAQ 페이지
 robots.txt, sitemap.xml            검색 엔진 수집·페이지 발견 설정
-assets/img/                        업로드 전 사용할 기본 동아리·학교 로고
 assets/vendor/                     고정 버전 외부 라이브러리
 supabase/migrations/               DB, RLS, Storage 구성 SQL
 ```
@@ -135,9 +134,9 @@ publishable key만 들어갑니다. `service_role` 키나 secret key는 절대 �
 임의 HTML 또는 스크립트를 실행하지 않습니다.
 
 Supabase 조회가 일시적으로 실패하면 `assets/js/content.js`의 페이지 문구와
-기본 로고를 사용합니다. 활동 기록은 데이터 불일치를 막기 위해 Supabase에서만
-조회합니다. 정상 상태에서는 Supabase 데이터가 우선합니다. `content.js`는 장애 시
-대체본이므로 일상적인 콘텐츠 수정에는 사용하지 않습니다.
+`site-assets` Storage의 기본 로고를 사용합니다. 활동 기록은 데이터 불일치를 막기
+위해 Supabase에서만 조회합니다. 정상 상태에서는 Supabase 데이터가 우선합니다.
+`content.js`는 장애 시 대체본이므로 일상적인 콘텐츠 수정에는 사용하지 않습니다.
 
 ## 이미지 저장 위치
 
@@ -145,10 +144,11 @@ Supabase 조회가 일시적으로 실패하면 `assets/js/content.js`의 페이
 `activity_photos.storage_path`와 연결되어 있습니다. 이관 전의 활동 이미지 폴더와
 사용하지 않는 로고 변형은 저장소에서 제거했습니다.
 
-동아리·학교 로고는 관리자가 처음 새 파일을 저장하기 전까지
-`assets/img/esc-logo.png`와 `assets/img/hssh-logo.jpg`를 기본값으로 사용합니다.
-관리자 화면에서 로고를 저장하면 공개 `site-assets` Storage의 고유 경로를 사용하며,
-교체하거나 제거한 이전 업로드 파일도 정리합니다.
+동아리·학교 기본 로고는 공개 `site-assets` Storage의
+`branding/club-logo.png`와 `branding/school-logo.jpg`에 저장됩니다. GitHub
+저장소에는 로고 이미지 원본을 중복 보관하지 않습니다. 관리자 화면에서 로고를
+저장하면 같은 버킷의 고유 경로를 사용하며, 교체하거나 제거한 이전 업로드 파일도
+정리합니다.
 
 ## HTML 수정 기준
 

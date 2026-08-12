@@ -331,7 +331,7 @@ a:hover {
   min-height: 300px;
   padding: 0;
   background-color: #fff;
-  background-image: url("../img/esc-logo.png");
+  background-image: url("https://cpjiqlrjxchjipceiyus.supabase.co/storage/v1/object/public/site-assets/branding/club-logo.png");
   background-size: contain;
 }
 
@@ -1078,7 +1078,7 @@ body.image-overlay-open {
 }
 
 .contact-bg {
-  background-image: url("../img/hssh-logo.jpg");
+  background-image: url("https://cpjiqlrjxchjipceiyus.supabase.co/storage/v1/object/public/site-assets/branding/school-logo.jpg");
   background-size: calc(100% - 120px) auto;
   background-position: center center;
 }

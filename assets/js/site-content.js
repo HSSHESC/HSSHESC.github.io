@@ -205,10 +205,10 @@
     const appleTouchIcon = document.querySelector("#siteAppleTouchIcon");
     const clubLogoUrl =
       getPublicAssetUrl(content.branding?.club_logo_storage_path) ||
-      getSafeUrl("assets/img/esc-logo.png");
+      getPublicAssetUrl("branding/club-logo.png");
     const schoolLogoUrl =
       getPublicAssetUrl(content.branding?.school_logo_storage_path) ||
-      getSafeUrl("assets/img/hssh-logo.jpg");
+      getPublicAssetUrl("branding/school-logo.jpg");
     const clubLogoAlt =
       content.branding?.club_logo_alt ||
       `${content.brand ?? "ESC"} 동아리 로고`;
