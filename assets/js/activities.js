@@ -40,9 +40,7 @@
     id: photo.id,
     caption: photo.caption ?? "",
     displayOrder: photo.display_order ?? 0,
-    url: photo.storage_path
-      ? (signedImageUrls.get(photo.storage_path) ?? "")
-      : photo.image_url,
+    url: signedImageUrls.get(photo.storage_path) ?? "",
   });
 
   const loadPublished = async () => {
@@ -72,9 +70,7 @@
     const activityIds = activities.map((activity) => activity.id);
     const { data: photos, error: photosError } = await client
       .from("activity_photos")
-      .select(
-        "id,activity_id,storage_path,image_url,caption,display_order,created_at",
-      )
+      .select("id,activity_id,storage_path,caption,display_order,created_at")
       .in("activity_id", activityIds)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true });
