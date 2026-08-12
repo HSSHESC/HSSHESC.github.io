@@ -7,6 +7,42 @@
     <title>ESC</title>
     <meta content="ESC, pioneers of empty spaces" name="description" />
     <meta content="introducing ESC" name="keywords" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ESC" id="ogTitle" />
+    <meta
+      property="og:description"
+      content="한성과학고등학교 정보공학 동아리 ESC 공식 홈페이지"
+      id="ogDescription"
+    />
+    <meta
+      property="og:image"
+      content="https://hsshesc.github.io/assets/img/esc-logo.png"
+      id="ogImage"
+    />
+    <meta property="og:url" content="https://hsshesc.github.io/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://hsshesc.github.io/" />
+    <link
+      rel="alternate"
+      hreflang="ko"
+      href="https://hsshesc.github.io/?lang=ko"
+    />
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://hsshesc.github.io/?lang=en"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "ESC",
+        "alternateName": "Engineering Science of Computer",
+        "url": "https://hsshesc.github.io/",
+        "logo": "https://hsshesc.github.io/assets/img/esc-logo.png",
+        "sameAs": ["https://github.com/HSSHESC"]
+      }
+    </script>
     <link id="siteFavicon" rel="icon" href="assets/img/esc-logo.png" />
     <link
       id="siteAppleTouchIcon"
@@ -31,6 +67,7 @@
   </head>
 
   <body>
+    <a class="skip-link" href="#main">본문으로 바로가기</a>
     <header id="header" class="fixed-top">
       <div class="container d-flex align-items-center justify-content-between">
         <h1 class="logo">
@@ -59,13 +96,31 @@
                 >Portfolio</a
               >
             </li>
+            <li><a class="nav-link" href="faq.html" id="navFaq">FAQ</a></li>
             <li>
               <a class="nav-link scrollto" href="#contact" id="navContact"
                 >Contact</a
               >
             </li>
+            <li class="language-switch-item">
+              <button
+                class="language-switch"
+                id="languageSwitch"
+                type="button"
+                aria-label="영어로 보기"
+              >
+                EN
+              </button>
+            </li>
           </ul>
-          <i class="bi bi-list mobile-nav-toggle"></i>
+          <button
+            class="mobile-nav-toggle"
+            type="button"
+            aria-label="메뉴 열기"
+            aria-expanded="false"
+          >
+            <i class="bi bi-list" aria-hidden="true"></i>
+          </button>
         </nav>
       </div>
     </header>
@@ -296,6 +351,52 @@
                 <h3 class="title-a" id="portfolioTitle">포트폴리오</h3>
                 <div class="line-mf"></div>
               </div>
+              <div
+                class="portfolio-filters"
+                id="portfolioFilters"
+                role="search"
+              >
+                <div>
+                  <label for="activitySearch" id="activitySearchLabel"
+                    >활동 검색</label
+                  >
+                  <input
+                    class="form-control"
+                    id="activitySearch"
+                    type="search"
+                    placeholder="제목, 설명 또는 태그 검색"
+                    autocomplete="off"
+                  />
+                </div>
+                <div>
+                  <label for="activityYear" id="activityYearLabel"
+                    >학년도</label
+                  >
+                  <select class="form-select" id="activityYear">
+                    <option value="">전체 학년도</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="activityType" id="activityTypeLabel"
+                    >활동 유형</label
+                  >
+                  <select class="form-select" id="activityType">
+                    <option value="">전체 유형</option>
+                  </select>
+                </div>
+                <button
+                  class="btn btn-outline-secondary"
+                  id="clearActivityFilters"
+                  type="button"
+                >
+                  초기화
+                </button>
+              </div>
+              <p
+                class="portfolio-result-count"
+                id="portfolioResultCount"
+                aria-live="polite"
+              ></p>
               <!-- Portfolio cards are rendered from Supabase. -->
               <div class="row g-4" id="portfolioItems"></div>
             </div>
@@ -380,7 +481,15 @@
       ><i class="bi bi-arrow-up-short"></i
     ></a>
 
-    <div class="image-overlay" id="imageOverlay" aria-hidden="true" inert>
+    <div
+      class="image-overlay"
+      id="imageOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="활동 사진 보기"
+      aria-hidden="true"
+      inert
+    >
       <button
         class="image-overlay-close"
         type="button"
@@ -418,10 +527,12 @@
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/year.js"></script>
+    <script src="assets/js/i18n.js"></script>
     <script src="assets/js/content.js"></script>
     <script src="assets/js/markdown.js"></script>
     <script src="assets/js/site-content.js"></script>
     <script src="assets/js/activities.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/public-features.js"></script>
   </body>
 </html>

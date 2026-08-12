@@ -68,9 +68,12 @@ runBrowserScript("assets/js/activities.js");
     await context.ESC_SUPABASE.from("activity_photos")
       .select("storage_path")
       .order("storage_path");
+  const { data: publicRevisions, error: publicRevisionsError } =
+    await context.ESC_SUPABASE.from("content_revisions").select("id");
 
   assert.ifError(siteContentError);
   assert.ifError(photoRowsError);
+  assert.ok(publicRevisionsError || publicRevisions.length === 0);
   assert.equal(siteContent.id, "home");
   assert.equal(typeof siteContent.content.about.title, "string");
   assert.equal(typeof siteContent.content.about.body_markdown, "string");
@@ -78,6 +81,8 @@ runBrowserScript("assets/js/activities.js");
   assert.equal(siteContent.content.about.paragraphs, undefined);
   assert.equal(siteContent.content.about.plans, undefined);
   assert.ok(Array.isArray(siteContent.content.activity_plans.items));
+  assert.ok(Array.isArray(siteContent.content.faq.items));
+  assert.equal(typeof siteContent.content.translations.en.faq.title, "string");
   assert.ok(Array.isArray(siteContent.content.contact.items));
   assert.ok(
     siteContent.content.contact.items.every((item) =>
@@ -116,6 +121,19 @@ runBrowserScript("assets/js/activities.js");
 
   assert.ok(activities.length > 0);
   assert.ok(activities.every((activity) => activity.title));
+  assert.ok(
+    activities.every((activity) =>
+      [
+        "project",
+        "education",
+        "festival",
+        "exchange",
+        "competition",
+        "other",
+      ].includes(activity.activityType),
+    ),
+  );
+  assert.ok(activities.every((activity) => Array.isArray(activity.tags)));
   assert.equal(
     photoRows.length,
     activities.reduce((count, activity) => count + activity.images.length, 0),

@@ -148,9 +148,12 @@
    * Mobile nav toggle
    */
   on("click", ".mobile-nav-toggle", function () {
-    select("#navbar").classList.toggle("navbar-mobile");
-    this.classList.toggle("bi-list");
-    this.classList.toggle("bi-x");
+    const isOpen = select("#navbar").classList.toggle("navbar-mobile");
+    const icon = this.querySelector("i");
+    icon.classList.toggle("bi-list", !isOpen);
+    icon.classList.toggle("bi-x", isOpen);
+    this.setAttribute("aria-expanded", String(isOpen));
+    this.setAttribute("aria-label", isOpen ? "메뉴 닫기" : "메뉴 열기");
   });
 
   /**
@@ -167,8 +170,11 @@
         if (navbar.classList.contains("navbar-mobile")) {
           navbar.classList.remove("navbar-mobile");
           let navbarToggle = select(".mobile-nav-toggle");
-          navbarToggle.classList.toggle("bi-list");
-          navbarToggle.classList.toggle("bi-x");
+          const icon = navbarToggle.querySelector("i");
+          icon.classList.add("bi-list");
+          icon.classList.remove("bi-x");
+          navbarToggle.setAttribute("aria-expanded", "false");
+          navbarToggle.setAttribute("aria-label", "메뉴 열기");
         }
         scrollto(this.hash);
       }
@@ -235,7 +241,9 @@
           throw new Error("Supabase activity loader is unavailable.");
         }
 
-        portfolioData = await window.ESC_ACTIVITIES.loadPublished();
+        portfolioData = (await window.ESC_ACTIVITIES.loadPublished()).map(
+          (item) => window.ESC_I18N.localizeActivity(item),
+        );
       } catch (error) {
         console.error("Supabase 활동 데이터를 불러오지 못했습니다.", error);
         portfolioItems.innerHTML = `
@@ -260,6 +268,20 @@
           const images = getPortfolioImages(item);
           const imageCaptions = getPortfolioImageCaptions(item);
           const title = escapeHtml(item.title);
+          const activityType = escapeHtml(item.activityType ?? "other");
+          const activityTypeLabel = escapeHtml(
+            window.ESC_I18N.labels().types[item.activityType] ??
+              window.ESC_I18N.labels().types.other,
+          );
+          const tags = Array.isArray(item.tags) ? item.tags : [];
+          const tagsMarkup = tags.length
+            ? `<div class="portfolio-tags">${tags
+                .map(
+                  (tag) =>
+                    `<span class="portfolio-tag">${escapeHtml(tag)}</span>`,
+                )
+                .join("")}</div>`
+            : "";
           const itemUrl = getSafeUrl(item.href, ["http:", "https:"]);
           const titleMarkup = itemUrl
             ? `<a class="portfolio-title-link" href="${escapeHtml(itemUrl)}" rel="noopener noreferrer">${title}</a>`
@@ -275,6 +297,11 @@
                                 src="${escapeHtml(image)}"
                                 alt="${escapeHtml(imageCaptions[imageIndex] ?? item.title)}"
                                 class="portfolio-thumb"
+                                loading="lazy"
+                                decoding="async"
+                                fetchpriority="low"
+                                width="960"
+                                height="540"
                             />
                         `,
                 )
@@ -282,17 +309,20 @@
             : `
                         <div class="portfolio-image-empty">
                             <i class="bi bi-image" aria-hidden="true"></i>
-                            <span>등록된 이미지가 없습니다.</span>
+                            <span>${escapeHtml(window.ESC_I18N.labels().noImage)}</span>
                         </div>
                     `;
           const controls =
             images.length > 1
               ? `
-                            <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="이전 대표 이미지">
+                            <button class="portfolio-slide-control portfolio-slide-prev" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().previousImage)}">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
-                            <button class="portfolio-slide-control portfolio-slide-next" type="button" aria-label="다음 대표 이미지">
+                            <button class="portfolio-slide-control portfolio-slide-next" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().nextImage)}">
                                 <i class="bi bi-chevron-right"></i>
+                            </button>
+                            <button class="portfolio-slide-control portfolio-slide-pause" type="button" aria-label="${escapeHtml(window.ESC_I18N.labels().pauseSlideshow)}" aria-pressed="false">
+                                <i class="bi bi-pause-fill" aria-hidden="true"></i>
                             </button>
                             <div class="portfolio-slide-dots" aria-hidden="true">
                                 ${images.map((_, imageIndex) => `<span class="${imageIndex === 0 ? "active" : ""}"></span>`).join("")}
@@ -306,22 +336,38 @@
                             class="portfolio-item"
                             data-portfolio-index="${itemIndex}"
                             data-has-images="${images.length > 0}"
-                            ${images.length ? 'role="button" tabindex="0"' : ""}
+                            data-year="${escapeHtml(String(item.date).slice(0, 4))}"
+                            data-type="${activityType}"
+                            data-search="${escapeHtml(
+                              [item.title, item.description, ...tags]
+                                .join(" ")
+                                .toLocaleLowerCase(),
+                            )}"
                         >
-                            <div class="portfolio-slider" data-slide-index="0">
+                            <div
+                              class="portfolio-slider"
+                              data-slide-index="0"
+                            >
                                 <div class="portfolio-slide-track">
                                     ${slides}
                                 </div>
                                 ${controls}
+                                ${
+                                  images.length
+                                    ? `<button class="portfolio-open-gallery" type="button" aria-label="${escapeHtml(`${item.title}: ${window.ESC_I18N.labels().openGallery}`)}"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>`
+                                    : ""
+                                }
                             </div>
                             <div class="portfolio-body">
                                 <div class="portfolio-icon">
                                     <i class="bi ${escapeHtml(item.icon)}"></i>
                                 </div>
                                 <div>
+                                    <span class="portfolio-type">${activityTypeLabel}</span>
                                     <h4 class="portfolio-title">${titleMarkup}</h4>
                                     <div class="portfolio-date">${escapeHtml(item.date)}</div>
                                     <div class="portfolio-description markdown-content markdown-content-compact">${descriptionMarkup}</div>
+                                    ${tagsMarkup}
                                 </div>
                             </div>
                         </article>
@@ -360,8 +406,56 @@
             updateCardSlide(slider, Number(slider.dataset.slideIndex) + 1);
           });
 
+        const pauseButton = slider.querySelector(".portfolio-slide-pause");
+        const reducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        slider.dataset.autoplayPaused = String(reducedMotion);
+
+        const setAutoplayPaused = (paused) => {
+          slider.dataset.autoplayPaused = String(paused);
+          pauseButton.setAttribute("aria-pressed", String(paused));
+          pauseButton.setAttribute(
+            "aria-label",
+            paused
+              ? window.ESC_I18N.labels().playSlideshow
+              : window.ESC_I18N.labels().pauseSlideshow,
+          );
+          pauseButton.querySelector("i").className = `bi ${
+            paused ? "bi-play-fill" : "bi-pause-fill"
+          }`;
+        };
+
+        setAutoplayPaused(reducedMotion);
+
+        pauseButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          setAutoplayPaused(slider.dataset.autoplayPaused !== "true");
+        });
+        slider.addEventListener("mouseenter", () => {
+          slider.dataset.interactionPaused = "true";
+        });
+        slider.addEventListener("mouseleave", () => {
+          slider.dataset.interactionPaused = "false";
+        });
+        slider.addEventListener("focusin", () => {
+          slider.dataset.interactionPaused = "true";
+        });
+        slider.addEventListener("focusout", (event) => {
+          if (!slider.contains(event.relatedTarget)) {
+            slider.dataset.interactionPaused = "false";
+          }
+        });
+
         window.setInterval(() => {
-          if (document.hidden || !slider.isConnected) return;
+          if (
+            document.hidden ||
+            !slider.isConnected ||
+            slider.dataset.autoplayPaused === "true" ||
+            slider.dataset.interactionPaused === "true"
+          ) {
+            return;
+          }
           updateCardSlide(slider, Number(slider.dataset.slideIndex) + 1);
         }, 3500);
       });
@@ -379,6 +473,7 @@
         let currentCaptions = [];
         let currentTitle = "";
         let currentIndex = 0;
+        let overlayTrigger = null;
 
         const updateOverlay = () => {
           overlayImage.src = currentImages[currentIndex];
@@ -398,6 +493,7 @@
           currentCaptions = getPortfolioImageCaptions(item);
           currentTitle = item.title;
           currentIndex = startIndex;
+          overlayTrigger = document.activeElement;
           updateOverlay();
           imageOverlay.classList.add("active");
           imageOverlay.setAttribute("aria-hidden", "false");
@@ -413,6 +509,9 @@
           document.body.classList.remove("image-overlay-open");
           overlayImage.src = "";
           overlayImage.alt = "";
+          if (overlayTrigger instanceof HTMLElement) {
+            overlayTrigger.focus();
+          }
         };
 
         const showOverlayImage = (step) => {
@@ -423,24 +522,20 @@
 
         select('.portfolio-item[data-has-images="true"]', true).forEach(
           (itemElement) => {
-            itemElement.addEventListener("click", (event) => {
-              if (event.target.closest("a, button")) return;
-
+            const slider = itemElement.querySelector(".portfolio-slider");
+            const openButton = slider.querySelector(".portfolio-open-gallery");
+            const openCurrentImage = () => {
               const item =
                 portfolioData[Number(itemElement.dataset.portfolioIndex)];
-              const slider = itemElement.querySelector(".portfolio-slider");
               openOverlay(item, Number(slider.dataset.slideIndex));
+            };
+            openButton.addEventListener("click", (event) => {
+              event.stopPropagation();
+              openCurrentImage();
             });
-            itemElement.addEventListener("keydown", (event) => {
-              if (event.target.closest("a, button")) return;
-
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                const item =
-                  portfolioData[Number(itemElement.dataset.portfolioIndex)];
-                const slider = itemElement.querySelector(".portfolio-slider");
-                openOverlay(item, Number(slider.dataset.slideIndex));
-              }
+            slider.addEventListener("click", (event) => {
+              if (event.target.closest("button")) return;
+              openCurrentImage();
             });
           },
         );
@@ -471,11 +566,32 @@
           if (event.key === "ArrowRight" && currentImages.length > 1) {
             showOverlayImage(1);
           }
+          if (event.key === "Tab") {
+            const controls = [closeButton, prevButton, nextButton].filter(
+              (button) => !button.hidden,
+            );
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }
         });
       }
+
+      window.dispatchEvent(
+        new CustomEvent("esc:portfolio-rendered", {
+          detail: { count: portfolioData.length },
+        }),
+      );
     };
 
     initializePortfolio();
+    window.addEventListener("esc:languagechange", initializePortfolio);
   }
 
   /**

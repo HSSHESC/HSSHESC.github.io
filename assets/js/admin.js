@@ -42,13 +42,17 @@
     activityCount: document.querySelector("#activityCount"),
     activityDate: document.querySelector("#activityDate"),
     activityDescription: document.querySelector("#activityDescription"),
+    activityDescriptionEn: document.querySelector("#activityDescriptionEn"),
     activityForm: document.querySelector("#activityForm"),
     activityIcon: document.querySelector("#activityIcon"),
     activityIconPreview: document.querySelector("#activityIconPreview"),
     activityId: document.querySelector("#activityId"),
     activityList: document.querySelector("#activityList"),
     activityPublished: document.querySelector("#activityPublished"),
+    activityTags: document.querySelector("#activityTags"),
     activityTitle: document.querySelector("#activityTitle"),
+    activityTitleEn: document.querySelector("#activityTitleEn"),
+    activityTypeSelect: document.querySelector("#activityTypeSelect"),
     activityUrl: document.querySelector("#activityUrl"),
     activityViewTab: document.querySelector("#activityViewTab"),
     addContactItemButton: document.querySelector("#addContactItemButton"),
@@ -65,6 +69,7 @@
       "#contactOverlayColorValue",
     ),
     contactTitleText: document.querySelector("#contactTitleText"),
+    contentLocale: document.querySelector("#contentLocale"),
     clubLogoAlt: document.querySelector("#clubLogoAlt"),
     clubLogoFile: document.querySelector("#clubLogoFile"),
     clubLogoPreview: document.querySelector("#clubLogoPreview"),
@@ -126,6 +131,7 @@
     logoFiles: { club: null, school: null },
     logoPreviewUrls: { club: null, school: null },
     removeLogos: { club: false, school: false },
+    contentLocale: "ko",
   };
 
   const isPlainObject = (value) =>
@@ -232,17 +238,18 @@
 
   const activateAdminView = (view) => {
     const showActivities = view === "activities";
+    const showContent = view === "content";
     elements.activityAdminView.hidden = !showActivities;
-    elements.siteContentAdminView.hidden = showActivities;
+    elements.siteContentAdminView.hidden = !showContent;
     elements.activityViewTab.classList.toggle("active", showActivities);
-    elements.siteContentViewTab.classList.toggle("active", !showActivities);
+    elements.siteContentViewTab.classList.toggle("active", showContent);
     elements.activityViewTab.setAttribute(
       "aria-selected",
       String(showActivities),
     );
     elements.siteContentViewTab.setAttribute(
       "aria-selected",
-      String(!showActivities),
+      String(showContent),
     );
   };
 
@@ -849,7 +856,16 @@
   };
 
   const renderSiteContentForm = () => {
-    const content = state.siteContent ?? fallbackSiteContent;
+    const baseContent = state.siteContent ?? fallbackSiteContent;
+    const content =
+      state.contentLocale === "en"
+        ? mergeContent(
+            baseContent,
+            baseContent.translations?.en ??
+              fallbackSiteContent.translations?.en ??
+              {},
+          )
+        : baseContent;
     elements.siteMetaTitle.value = content.meta?.title ?? "";
     elements.siteMetaDescription.value = content.meta?.description ?? "";
     elements.siteMetaKeywords.value = content.meta?.keywords ?? "";
@@ -1132,8 +1148,12 @@
           sectionContent.branding[logoFields[kind].pathKey] = path;
         }
       }
+      const contentPatch =
+        state.contentLocale === "en"
+          ? { translations: { en: sectionContent } }
+          : sectionContent;
       const nextContent = normalizeSiteContent(
-        mergeContent(state.siteContent ?? fallbackSiteContent, sectionContent),
+        mergeContent(state.siteContent ?? fallbackSiteContent, contentPatch),
       );
       const { data, error } = await client
         .from("site_content")
@@ -1217,6 +1237,7 @@
     elements.activityForm.reset();
     elements.activityId.value = "";
     elements.activityIcon.value = "bi-stars";
+    elements.activityTypeSelect.value = "other";
     updateIconPreview(elements.activityIcon, elements.activityIconPreview);
     elements.activityPublished.checked = true;
     elements.newPhotos.value = "";
@@ -1244,8 +1265,14 @@
     elements.newPhotos.value = "";
     elements.activityId.value = activity.id;
     elements.activityTitle.value = activity.title;
+    elements.activityTitleEn.value = activity.title_en ?? "";
     elements.activityDate.value = activity.activity_date;
     elements.activityDescription.value = activity.description;
+    elements.activityDescriptionEn.value = activity.description_en ?? "";
+    elements.activityTypeSelect.value = activity.activity_type ?? "other";
+    elements.activityTags.value = Array.isArray(activity.tags)
+      ? activity.tags.join(", ")
+      : "";
     elements.activityUrl.value = activity.external_url ?? "";
     elements.activityIcon.value = activity.icon;
     updateIconPreview(elements.activityIcon, elements.activityIconPreview);
@@ -1263,7 +1290,7 @@
       client
         .from("activities")
         .select(
-          "id,title,description,activity_date,external_url,icon,is_published,created_by,created_at,updated_at",
+          "id,title,title_en,description,description_en,activity_date,external_url,icon,is_published,activity_type,tags,created_by,created_at,updated_at",
         )
         .order("activity_date", { ascending: false })
         .order("created_at", { ascending: false }),
@@ -1517,10 +1544,21 @@
       const payload = {
         activity_date: elements.activityDate.value,
         description: elements.activityDescription.value.trim(),
+        description_en: elements.activityDescriptionEn.value.trim() || null,
         external_url: elements.activityUrl.value.trim() || null,
         icon: elements.activityIcon.value,
         is_published: elements.activityPublished.checked,
+        activity_type: elements.activityTypeSelect.value,
+        tags: [
+          ...new Set(
+            elements.activityTags.value
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+          ),
+        ].slice(0, 12),
         title,
+        title_en: elements.activityTitleEn.value.trim() || null,
       };
 
       let saveResult;
@@ -1794,6 +1832,10 @@
   elements.siteContentViewTab.addEventListener("click", () => {
     clearMessage();
     activateAdminView("content");
+  });
+  elements.contentLocale.addEventListener("change", () => {
+    state.contentLocale = elements.contentLocale.value;
+    renderSiteContentForm();
   });
   elements.addServiceItemButton.addEventListener("click", () => {
     appendServiceContentItem({

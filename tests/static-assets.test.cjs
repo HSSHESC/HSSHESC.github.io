@@ -6,7 +6,7 @@ const projectRoot = path.resolve(__dirname, "..");
 const read = (relativePath) =>
   fs.readFileSync(path.join(projectRoot, relativePath), "utf8");
 
-const htmlFiles = ["index.html", "admin.html"];
+const htmlFiles = ["index.html", "admin.html", "faq.html"];
 const missing = [];
 
 htmlFiles.forEach((relativePath) => {
@@ -51,6 +51,12 @@ assert.ok(yearPosition >= 0);
 assert.ok(yearPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
+assert.ok(
+  indexHtml.indexOf("assets/js/i18n.js") <
+    indexHtml.indexOf("assets/js/site-content.js"),
+);
+assert.ok(indexHtml.includes('id="activitySearch"'));
+assert.ok(indexHtml.includes('href="faq.html"'));
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
 assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
@@ -61,6 +67,15 @@ assert.ok(
   adminHtml.indexOf("assets/js/year.js") <
     adminHtml.indexOf("assets/js/admin.js"),
 );
+assert.ok(adminHtml.includes('id="toolsAdminView"'));
+assert.ok(adminHtml.includes('id="faqAdminItems"'));
+assert.ok(adminHtml.includes('id="revisionList"'));
+assert.ok(adminHtml.includes('id="adminStats"'));
+
+const faqHtml = read("faq.html");
+assert.ok(faqHtml.includes('id="faqList"'));
+assert.ok(faqHtml.includes("assets/js/faq.js"));
+assert.ok(faqHtml.includes('rel="canonical"'));
 
 const currentSiteSources = [
   indexHtml,
