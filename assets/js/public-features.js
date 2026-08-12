@@ -50,12 +50,22 @@
     const types = [...new Set(cards.map((card) => card.dataset.type))].filter(
       Boolean,
     );
+    const dynamicTypeLabels = new Map(
+      cards
+        .filter((card) => card.dataset.type)
+        .map((card) => [card.dataset.type, card.dataset.typeLabel]),
+    );
 
     yearSelect.replaceChildren(new Option("전체 학년도", ""));
     years.forEach((year) => yearSelect.add(new Option(`${year}학년도`, year)));
     typeSelect.replaceChildren(new Option("전체 유형", ""));
     types.forEach((type) =>
-      typeSelect.add(new Option(typeLabels[type] ?? type, type)),
+      typeSelect.add(
+        new Option(
+          dynamicTypeLabels.get(type) || typeLabels[type] || type,
+          type,
+        ),
+      ),
     );
     yearSelect.value = years.includes(selectedYear) ? selectedYear : "";
     typeSelect.value = types.includes(selectedType) ? selectedType : "";

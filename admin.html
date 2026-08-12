@@ -244,6 +244,27 @@
                         <option value="competition">대회</option>
                         <option value="other" selected>기타</option>
                       </select>
+                      <div class="activity-type-add-row">
+                        <input
+                          class="form-control"
+                          id="newActivityTypeName"
+                          type="text"
+                          maxlength="50"
+                          placeholder="새 유형 이름"
+                          aria-label="새 활동 유형 이름"
+                          autocomplete="off"
+                        />
+                        <button
+                          class="btn btn-outline-primary"
+                          id="addActivityTypeButton"
+                          type="button"
+                        >
+                          유형 추가
+                        </button>
+                      </div>
+                      <div class="form-text">
+                        추가한 유형은 바로 위 목록에서 선택할 수 있습니다.
+                      </div>
                     </div>
                     <div class="col-12">
                       <label class="form-label" for="activityDescription"

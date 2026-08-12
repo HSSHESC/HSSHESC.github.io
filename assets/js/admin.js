@@ -36,8 +36,17 @@
     ["bi-instagram", "Instagram"],
     ["bi-link-45deg", "링크"],
   ];
+  const defaultActivityTypes = [
+    { slug: "project", label: "프로젝트", display_order: 10 },
+    { slug: "education", label: "교육", display_order: 20 },
+    { slug: "festival", label: "축제", display_order: 30 },
+    { slug: "exchange", label: "교류", display_order: 40 },
+    { slug: "competition", label: "대회", display_order: 50 },
+    { slug: "other", label: "기타", display_order: 60 },
+  ];
 
   const elements = {
+    addActivityTypeButton: document.querySelector("#addActivityTypeButton"),
     activityAdminView: document.querySelector("#activityAdminView"),
     activityCount: document.querySelector("#activityCount"),
     activityDate: document.querySelector("#activityDate"),
@@ -88,6 +97,7 @@
     loginSection: document.querySelector("#loginSection"),
     logoutButton: document.querySelector("#logoutButton"),
     newActivityButton: document.querySelector("#newActivityButton"),
+    newActivityTypeName: document.querySelector("#newActivityTypeName"),
     newPhotoList: document.querySelector("#newPhotoList"),
     newPhotos: document.querySelector("#newPhotos"),
     navAboutText: document.querySelector("#navAboutText"),
@@ -118,7 +128,10 @@
 
   const state = {
     activities: [],
+    activityTypeAddInProgress: false,
+    activityTypes: [...defaultActivityTypes],
     currentUser: null,
+    editorBusy: false,
     newFiles: [],
     photos: [],
     previewUrls: [],
@@ -268,6 +281,7 @@
   };
 
   const setEditorBusy = (busy) => {
+    state.editorBusy = busy;
     elements.activityForm.setAttribute("aria-busy", String(busy));
     elements.activityForm
       .querySelectorAll("input, textarea, select, button")
@@ -276,6 +290,107 @@
       });
     elements.newActivityButton.disabled = busy;
     elements.saveActivityButton.textContent = busy ? "저장 중..." : "저장";
+    if (!busy && state.activityTypeAddInProgress) {
+      elements.newActivityTypeName.disabled = true;
+      elements.addActivityTypeButton.disabled = true;
+    }
+  };
+
+  const sortActivityTypes = (activityTypes) =>
+    [...activityTypes].sort(
+      (first, second) =>
+        first.display_order - second.display_order ||
+        first.label.localeCompare(second.label, "ko-KR"),
+    );
+
+  const renderActivityTypeOptions = (
+    selectedSlug = elements.activityTypeSelect.value,
+  ) => {
+    const activityTypes = sortActivityTypes(
+      state.activityTypes.length ? state.activityTypes : defaultActivityTypes,
+    );
+    elements.activityTypeSelect.replaceChildren(
+      ...activityTypes.map((activityType) => {
+        const option = document.createElement("option");
+        option.value = activityType.slug;
+        option.textContent = activityType.label;
+        return option;
+      }),
+    );
+    const nextSlug = activityTypes.some(
+      (activityType) => activityType.slug === selectedSlug,
+    )
+      ? selectedSlug
+      : activityTypes.some((activityType) => activityType.slug === "other")
+        ? "other"
+        : activityTypes[0]?.slug;
+    elements.activityTypeSelect.value = nextSlug ?? "";
+  };
+
+  const loadActivityTypes = async () => {
+    const { data, error } = await client
+      .from("activity_types")
+      .select("slug,label,display_order")
+      .order("display_order", { ascending: true })
+      .order("label", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    state.activityTypes = data;
+    renderActivityTypeOptions();
+  };
+
+  const setActivityTypeAddBusy = (busy) => {
+    state.activityTypeAddInProgress = busy;
+    elements.newActivityTypeName.disabled = busy || state.editorBusy;
+    elements.addActivityTypeButton.disabled = busy || state.editorBusy;
+    elements.addActivityTypeButton.textContent = busy
+      ? "추가 중..."
+      : "유형 추가";
+  };
+
+  const handleAddActivityType = async () => {
+    if (state.activityTypeAddInProgress) {
+      return;
+    }
+
+    clearMessage();
+    const label = elements.newActivityTypeName.value.trim();
+    if (!label) {
+      setMessage("추가할 활동 유형 이름을 입력해 주세요.", "warning");
+      elements.newActivityTypeName.focus();
+      return;
+    }
+
+    setActivityTypeAddBusy(true);
+    try {
+      const { data, error } = await client
+        .from("activity_types")
+        .insert({ label })
+        .select("slug,label,display_order")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      state.activityTypes = sortActivityTypes([...state.activityTypes, data]);
+      renderActivityTypeOptions(data.slug);
+      elements.newActivityTypeName.value = "";
+      setMessage(`활동 유형 '${data.label}'이(가) 추가되었습니다.`, "success");
+    } catch (error) {
+      console.error("활동 유형 추가에 실패했습니다.", error);
+      setMessage(
+        error?.code === "23505"
+          ? "같은 이름의 활동 유형이 이미 있습니다."
+          : "활동 유형을 추가하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        "danger",
+      );
+    } finally {
+      setActivityTypeAddBusy(false);
+    }
   };
 
   const setSiteContentBusy = (sectionName, busy) => {
@@ -1313,6 +1428,7 @@
   const showLogin = () => {
     state.currentUser = null;
     state.activities = [];
+    state.activityTypes = [...defaultActivityTypes];
     state.photos = [];
     state.selectedActivityId = null;
     state.newFiles = [];
@@ -1325,6 +1441,9 @@
     elements.adminEmail.hidden = true;
     elements.adminEmail.textContent = "";
     elements.loginPassword.value = "";
+    elements.newActivityTypeName.value = "";
+    setActivityTypeAddBusy(false);
+    renderActivityTypeOptions("other");
     activateAdminView("activities");
   };
 
@@ -1352,6 +1471,7 @@
     elements.logoutButton.hidden = false;
     elements.adminEmail.hidden = false;
     elements.adminEmail.textContent = user.email ?? "관리자";
+    await loadActivityTypes();
     await Promise.all([loadActivities(), loadSiteContent()]);
     activateAdminView("activities");
     return true;
@@ -1783,6 +1903,16 @@
 
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.activityForm.addEventListener("submit", handleSaveActivity);
+  elements.addActivityTypeButton.addEventListener(
+    "click",
+    handleAddActivityType,
+  );
+  elements.newActivityTypeName.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleAddActivityType();
+    }
+  });
   elements.siteContentForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const sectionName = event.submitter?.dataset.section;

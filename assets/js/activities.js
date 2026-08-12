@@ -53,7 +53,7 @@
     const { data: activities, error: activitiesError } = await client
       .from("activities")
       .select(
-        "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags",
+        "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags,activity_type_info:activity_types(label)",
       )
       .eq("is_published", true)
       .order("activity_date", { ascending: false })
@@ -99,6 +99,10 @@
         href: activity.external_url,
         icon: activity.icon,
         activityType: activity.activity_type ?? "other",
+        activityTypeLabel:
+          activity.activity_type_info?.label ??
+          activity.activity_type ??
+          "기타",
         tags: Array.isArray(activity.tags) ? activity.tags : [],
         images: activityPhotos.map((photo) => photo.url),
         imageCaptions: activityPhotos.map(
