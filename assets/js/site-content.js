@@ -186,7 +186,6 @@
   };
 
   const applyAssets = (content) => {
-    const headerLogo = document.querySelector("#siteHeaderLogo");
     const aboutLogo = document.querySelector("#aboutLogoImage");
     const activityBand = document.querySelector("#counter");
     const contact = document.querySelector("#contact");
@@ -203,11 +202,6 @@
       `${content.brand ?? "ESC"} 동아리 로고`;
     const schoolLogoAlt = content.branding?.school_logo_alt || "학교 로고";
 
-    if (headerLogo) {
-      headerLogo.hidden = !clubLogoUrl;
-      headerLogo.src = clubLogoUrl;
-      headerLogo.alt = clubLogoUrl ? clubLogoAlt : "";
-    }
     if (aboutLogo) {
       aboutLogo.hidden = !clubLogoUrl;
       aboutLogo.src = clubLogoUrl;
