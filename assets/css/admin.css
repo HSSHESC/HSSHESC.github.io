@@ -48,13 +48,30 @@
   gap: 0.65rem;
 }
 
-#adminEmail {
+#adminEmail,
+#accountEmail {
   max-width: 240px;
   color: rgba(255, 255, 255, 0.75);
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.admin-account-link {
+  border-radius: 6px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.admin-account-link:hover,
+.admin-account-link:focus-visible {
+  color: #fff !important;
+  text-decoration-color: currentColor;
 }
 
 .admin-main {
@@ -81,6 +98,87 @@
   width: min(100%, 520px);
   margin: 4rem auto 0;
   padding: 2rem;
+}
+
+.account-management-card {
+  width: min(100%, 640px);
+  margin: 2rem auto 0;
+}
+
+.account-email-summary {
+  margin-bottom: 1.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e2e7ee;
+  border-radius: 10px;
+  color: #475467;
+  background: #f8fafc;
+}
+
+.account-email-summary strong {
+  color: var(--head);
+  overflow-wrap: anywhere;
+}
+
+.password-strength {
+  margin-top: 0.7rem;
+}
+
+.password-strength-heading {
+  margin-bottom: 0.45rem;
+  color: #475467;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+}
+
+.password-strength-heading strong {
+  color: #667085;
+}
+
+.password-strength-meter {
+  height: 9px;
+  border-radius: 999px;
+  background: #e4e7ec;
+  overflow: hidden;
+}
+
+.password-strength-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: transparent;
+  transition:
+    width 180ms ease,
+    background-color 180ms ease;
+}
+
+.password-strength-bar.is-weak {
+  width: 33.333%;
+  background: #dc2626;
+}
+
+.password-strength-bar.is-medium {
+  width: 66.666%;
+  background: #eab308;
+}
+
+.password-strength-bar.is-strong {
+  width: 100%;
+  background: #16a34a;
+}
+
+.password-strength-note {
+  margin: 0.55rem 0 0;
+  color: #667085;
+  font-size: 0.82rem;
+}
+
+.account-form-actions {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .admin-card-heading {
@@ -723,7 +821,8 @@
     flex-wrap: wrap;
   }
 
-  #adminEmail {
+  #adminEmail,
+  #accountEmail {
     width: 100%;
     max-width: none;
   }
@@ -773,5 +872,9 @@
 
   .editor-actions-right .btn {
     flex: 1;
+  }
+
+  .account-form-actions .btn {
+    width: 100%;
   }
 }
