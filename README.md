@@ -71,7 +71,8 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 반환됩니다.
 
 공개 홈페이지의 활동 기록에서는 제목·설명·태그 검색, 학년도 필터, 활동 유형
-필터를 함께 사용할 수 있습니다. 홈페이지와 관리자 화면은 한국어로 제공됩니다.
+필터를 함께 사용할 수 있습니다. 별도의 한·영 전환 기능이나 영어 전용 콘텐츠
+입력란은 없으며, 기존 디자인에 포함된 영문 메뉴와 표현은 그대로 사용합니다.
 FAQ는 https://hsshesc.github.io/faq.html 에서 확인합니다.
 
 ## 최초 관리자 계정 설정
@@ -119,6 +120,7 @@ where user_id = (
 - 기존 포트폴리오 활동 6개, 사진 12개와 홈페이지 전체 문구
 - 활동 분류·태그 및 관리자 전용 `content_revisions` 수정 이력
 - FAQ 콘텐츠
+- 언어 전환용 번역 데이터와 활동의 영어 전용 컬럼 삭제
 
 `assets/js/supabase-config.js`에는 브라우저에 공개해도 되는 프로젝트 URL과
 publishable key만 들어갑니다. `service_role` 키나 secret key는 절대 넣지
