@@ -4,8 +4,8 @@ window.ESC_CONTENT = {
   site: {
     meta: {
       title: "ESC",
-      description: "한성과학고등학교 정보공학 동아리 ESC 공식 홈페이지",
-      keywords: "ESC, 한성과학고등학교, 정보공학 동아리",
+      description: "ESC, pioneers of empty spaces",
+      keywords: "introducing ESC",
     },
     brand: "ESC",
     branding: {
@@ -18,22 +18,22 @@ window.ESC_CONTENT = {
       contact_overlay_color: "#8b5cf6",
     },
     navigation: {
-      home: "홈",
-      about: "소개",
-      activities: "활동 계획",
-      portfolio: "활동 기록",
+      home: "Home",
+      about: "About",
+      activities: "Activities",
+      portfolio: "Portfolio",
       faq: "FAQ",
-      contact: "연락처",
+      contact: "Contact",
     },
     hero: {
       title: "ESC",
       typed_items: [
-        "개발자",
-        "제작자",
-        "리더",
-        "프로그래머",
-        "과학자",
-        "혁신가",
+        "Developer",
+        "Maker",
+        "Leader",
+        "Programmer",
+        "Scientist",
+        "Innovator",
       ],
     },
     about: {
@@ -95,7 +95,7 @@ window.ESC_CONTENT = {
       items: [],
     },
     contact: {
-      title: "연락처",
+      title: "Contact",
       intro: "더 궁금한 사항이 있다면 아래 연락처를 통해 문의해 주세요.",
       items: [
         {
@@ -111,7 +111,7 @@ window.ESC_CONTENT = {
     },
     footer: {
       copyright_name: "ESC",
-      rights_text: "모든 권리 보유.",
+      rights_text: "All Rights Reserved.",
       admin_label: "관리자",
     },
   },

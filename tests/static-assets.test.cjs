@@ -59,6 +59,14 @@ assert.ok(
 assert.ok(!indexHtml.includes('id="languageSwitch"'));
 assert.ok(!indexHtml.includes("assets/js/i18n.js"));
 assert.ok(!indexHtml.includes('hreflang="en"'));
+assert.match(indexHtml, /id="navHome"[^>]*>\s*Home<\/a\s*>/);
+assert.match(indexHtml, /id="navAbout"[^>]*>\s*About<\/a\s*>/);
+assert.match(indexHtml, /id="navActivities"[^>]*>\s*Activities<\/a\s*>/);
+assert.match(indexHtml, /id="navPortfolio"[^>]*>\s*Portfolio<\/a\s*>/);
+assert.match(indexHtml, /id="navContact"[^>]*>\s*Contact<\/a\s*>/);
+assert.ok(indexHtml.includes("ESC, pioneers of empty spaces"));
+assert.ok(indexHtml.includes("Developer, Maker, Leader"));
+assert.ok(indexHtml.includes("All Rights Reserved."));
 assert.ok(!indexHtml.includes("bootstrap.bundle.min.js"));
 assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
@@ -81,10 +89,21 @@ assert.ok(faqHtml.includes('rel="canonical"'));
 assert.ok(!faqHtml.includes('id="languageSwitch"'));
 assert.ok(!faqHtml.includes("assets/js/i18n.js"));
 assert.ok(!faqHtml.includes('hreflang="en"'));
+assert.ok(faqHtml.includes('id="faqHomeLink">Home</a>'));
+assert.ok(faqHtml.includes("All Rights Reserved."));
 assert.ok(!adminHtml.includes("activityTitleEn"));
 assert.ok(!adminHtml.includes("activityDescriptionEn"));
 assert.ok(!adminHtml.includes("contentLocale"));
 assert.ok(!adminHtml.includes("faqTitleEn"));
+
+const languageCleanupMigration = read(
+  "supabase/migrations/20260812054057_restore_original_labels_remove_english_data.sql",
+);
+assert.ok(languageCleanupMigration.includes("content - 'translations'"));
+assert.ok(languageCleanupMigration.includes("drop column if exists title_en"));
+assert.ok(
+  languageCleanupMigration.includes("drop column if exists description_en"),
+);
 
 const currentSiteSources = [
   indexHtml,

@@ -9,7 +9,7 @@
     document.title = `${faq.title ?? "FAQ"} | ESC`;
     document.querySelector("#faqTitle").textContent = faq.title ?? "FAQ";
     document.querySelector("#faqSubtitle").textContent = faq.subtitle ?? "";
-    document.querySelector("#faqHomeLink").textContent = "홈으로";
+    document.querySelector("#faqHomeLink").textContent = "Home";
 
     const items = Array.isArray(faq.items) ? faq.items : [];
     faqList.replaceChildren();

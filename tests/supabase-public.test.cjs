@@ -82,8 +82,23 @@ runBrowserScript("assets/js/activities.js");
   assert.equal(siteContent.content.about.plans, undefined);
   assert.ok(Array.isArray(siteContent.content.activity_plans.items));
   assert.ok(Array.isArray(siteContent.content.faq.items));
-  assert.equal(siteContent.content.navigation.home, "홈");
-  assert.equal(siteContent.content.navigation.contact, "연락처");
+  assert.equal(
+    siteContent.content.meta.description,
+    "ESC, pioneers of empty spaces",
+  );
+  assert.equal(siteContent.content.meta.keywords, "introducing ESC");
+  assert.equal(siteContent.content.navigation.home, "Home");
+  assert.equal(siteContent.content.navigation.contact, "Contact");
+  assert.deepEqual(Array.from(siteContent.content.hero.typed_items), [
+    "Developer",
+    "Maker",
+    "Leader",
+    "Programmer",
+    "Scientist",
+    "Innovator",
+  ]);
+  assert.equal(siteContent.content.footer.rights_text, "All Rights Reserved.");
+  assert.equal(siteContent.content.translations, undefined);
   assert.ok(Array.isArray(siteContent.content.contact.items));
   assert.ok(
     siteContent.content.contact.items.every((item) =>
