@@ -86,6 +86,9 @@ const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));
 assert.ok(faqHtml.includes("assets/js/faq.js"));
 assert.ok(faqHtml.includes('rel="canonical"'));
+const extractFooter = (source) =>
+  source.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
+assert.equal(extractFooter(faqHtml), extractFooter(indexHtml));
 assert.ok(!faqHtml.includes('id="languageSwitch"'));
 assert.ok(!faqHtml.includes("assets/js/i18n.js"));
 assert.ok(!faqHtml.includes('hreflang="en"'));
