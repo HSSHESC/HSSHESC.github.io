@@ -4,6 +4,10 @@
   color: var(--head);
 }
 
+.admin-page .skip-link {
+  z-index: 1200;
+}
+
 .admin-topbar {
   position: sticky;
   top: 0;
@@ -597,6 +601,108 @@
   font-weight: 700;
 }
 
+.content-locale-picker {
+  min-width: 170px;
+  color: #344054;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tools-section {
+  margin-bottom: 1.25rem;
+}
+
+.faq-admin-row {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e5ec;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.faq-admin-row .faq-remove {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.8rem;
+}
+
+.admin-stat-card {
+  min-height: 110px;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.admin-stat-card strong {
+  color: var(--secondary);
+  font-size: 1.35rem;
+}
+
+.revision-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.revision-row {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #e2e7ee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.revision-row div {
+  display: flex;
+  flex-direction: column;
+}
+
+.revision-row span {
+  color: #667085;
+  font-size: 0.82rem;
+}
+
+.admin-preview-dialog {
+  width: min(900px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1.25rem;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.admin-preview-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.admin-preview-heading {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-preview-card,
+.admin-site-preview {
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #e0e5ec;
+}
+
 @media (max-width: 991px) {
   .activity-list-panel {
     position: static;
@@ -604,6 +710,9 @@
 }
 
 @media (max-width: 767px) {
+  .faq-admin-row {
+    grid-template-columns: 1fr;
+  }
   .admin-topbar .container,
   .admin-dashboard-heading,
   .admin-view-heading,

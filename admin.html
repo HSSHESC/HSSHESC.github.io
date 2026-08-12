@@ -24,6 +24,7 @@
   </head>
 
   <body class="admin-page">
+    <a class="skip-link" href="#adminMain">관리 화면으로 바로가기</a>
     <header class="admin-topbar">
       <div
         class="container d-flex align-items-center justify-content-between gap-3"
@@ -52,7 +53,7 @@
       </div>
     </header>
 
-    <main class="container admin-main">
+    <main class="container admin-main" id="adminMain">
       <noscript>
         <div class="alert alert-danger">
           관리자 화면을 사용하려면 JavaScript를 활성화해야 합니다.
@@ -146,6 +147,17 @@
             <i class="bi bi-layout-text-window-reverse"></i>
             페이지 문구
           </button>
+          <button
+            class="admin-view-tab"
+            id="toolsViewTab"
+            type="button"
+            role="tab"
+            aria-controls="toolsAdminView"
+            aria-selected="false"
+          >
+            <i class="bi bi-clock-history"></i>
+            미리보기·FAQ·통계·복원
+          </button>
         </div>
 
         <section id="activityAdminView" role="tabpanel">
@@ -214,6 +226,31 @@
                         required
                       />
                     </div>
+                    <div class="col-md-8">
+                      <label class="form-label" for="activityTitleEn"
+                        >활동명(영어)</label
+                      >
+                      <input
+                        class="form-control"
+                        id="activityTitleEn"
+                        type="text"
+                        maxlength="120"
+                        placeholder="선택 입력"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="activityTypeSelect"
+                        >활동 유형</label
+                      >
+                      <select class="form-select" id="activityTypeSelect">
+                        <option value="project">프로젝트</option>
+                        <option value="education">교육</option>
+                        <option value="festival">축제</option>
+                        <option value="exchange">교류</option>
+                        <option value="competition">대회</option>
+                        <option value="other" selected>기타</option>
+                      </select>
+                    </div>
                     <div class="col-12">
                       <label class="form-label" for="activityDescription"
                         >활동 설명</label
@@ -228,6 +265,31 @@
                       <div class="form-text">
                         Markdown을 사용할 수 있습니다. 예: **굵게**,
                         [링크](https://example.com), 목록, 인용문, 코드
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="form-label" for="activityDescriptionEn"
+                        >활동 설명(영어)</label
+                      >
+                      <textarea
+                        class="form-control"
+                        id="activityDescriptionEn"
+                        maxlength="5000"
+                        rows="4"
+                        placeholder="선택 입력, Markdown 사용 가능"
+                      ></textarea>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="activityTags">태그</label>
+                      <textarea
+                        class="form-control"
+                        id="activityTags"
+                        maxlength="360"
+                        rows="4"
+                        placeholder="AI, Python, 축제"
+                      ></textarea>
+                      <div class="form-text">
+                        쉼표로 구분하며 최대 12개까지 저장합니다.
                       </div>
                     </div>
                     <div class="col-md-8">
@@ -320,6 +382,13 @@
                     </button>
                     <div class="editor-actions-right">
                       <button
+                        class="btn btn-outline-primary"
+                        id="previewActivityButton"
+                        type="button"
+                      >
+                        미리보기
+                      </button>
+                      <button
                         class="btn btn-outline-secondary"
                         id="resetActivityButton"
                         type="button"
@@ -349,6 +418,13 @@
                 저장한 내용은 공개 홈페이지의 제목, 소개, 활동 계획, 연락처와
                 푸터에 반영됩니다.
               </p>
+            </div>
+            <div class="content-locale-picker">
+              <label for="contentLocale">편집 언어</label>
+              <select class="form-select" id="contentLocale">
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+              </select>
             </div>
           </div>
 
@@ -939,15 +1015,146 @@
             </div>
           </form>
         </section>
+
+        <section id="toolsAdminView" role="tabpanel" hidden>
+          <div class="admin-view-heading">
+            <div>
+              <h2>운영 도구</h2>
+              <p>
+                저장 전 미리보기, FAQ 편집, 콘텐츠 통계와 이전 버전 복원을
+                관리합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-panel tools-section">
+            <div class="admin-panel-title"><h3>공개 페이지 미리보기</h3></div>
+            <p>현재 저장된 홈페이지를 새 창 크기의 프레임에서 확인합니다.</p>
+            <button
+              class="btn admin-primary-button"
+              id="previewSiteButton"
+              type="button"
+            >
+              홈페이지 미리보기
+            </button>
+          </div>
+
+          <div class="admin-panel tools-section">
+            <div class="admin-panel-title"><h3>FAQ 편집</h3></div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="faqTitleKo">제목(한국어)</label>
+                <input
+                  class="form-control"
+                  id="faqTitleKo"
+                  type="text"
+                  maxlength="100"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="faqTitleEn"
+                  >Title (English)</label
+                >
+                <input
+                  class="form-control"
+                  id="faqTitleEn"
+                  type="text"
+                  maxlength="100"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="faqSubtitleKo"
+                  >설명(한국어)</label
+                >
+                <input
+                  class="form-control"
+                  id="faqSubtitleKo"
+                  type="text"
+                  maxlength="240"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="faqSubtitleEn"
+                  >Description (English)</label
+                >
+                <input
+                  class="form-control"
+                  id="faqSubtitleEn"
+                  type="text"
+                  maxlength="240"
+                />
+              </div>
+            </div>
+            <div id="faqAdminItems" class="content-repeat-list"></div>
+            <div class="content-section-actions content-section-actions-split">
+              <button
+                class="btn btn-outline-secondary"
+                id="addFaqButton"
+                type="button"
+              >
+                질문 추가
+              </button>
+              <button
+                class="btn admin-primary-button"
+                id="saveFaqButton"
+                type="button"
+              >
+                FAQ 저장
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-panel tools-section">
+            <div class="admin-panel-title"><h3>콘텐츠 통계</h3></div>
+            <div
+              class="admin-stats-grid"
+              id="adminStats"
+              aria-live="polite"
+            ></div>
+          </div>
+
+          <div class="admin-panel tools-section">
+            <div class="admin-panel-title">
+              <h3>수정 이력 및 복원</h3>
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                id="refreshRevisionsButton"
+                type="button"
+              >
+                새로고침
+              </button>
+            </div>
+            <p class="form-text">
+              복원하면 현재 상태도 새 이력으로 보존됩니다.
+            </p>
+            <div class="revision-list" id="revisionList"></div>
+          </div>
+        </section>
       </section>
     </main>
+
+    <dialog class="admin-preview-dialog" id="adminPreviewDialog">
+      <div class="admin-preview-heading">
+        <h2 id="adminPreviewTitle">미리보기</h2>
+        <button
+          class="btn btn-outline-secondary"
+          id="closePreviewButton"
+          type="button"
+        >
+          닫기
+        </button>
+      </div>
+      <div id="adminPreviewContent"></div>
+    </dialog>
 
     <script src="assets/vendor/supabase/supabase.js"></script>
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/supabase-client.js"></script>
     <script src="assets/js/year.js"></script>
+    <script src="assets/js/i18n.js"></script>
     <script src="assets/js/content.js"></script>
     <script src="assets/js/markdown.js"></script>
     <script src="assets/js/admin.js"></script>
+    <script src="assets/js/admin-features.js"></script>
   </body>
 </html>

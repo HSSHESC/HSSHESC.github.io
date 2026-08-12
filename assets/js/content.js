@@ -22,6 +22,7 @@ window.ESC_CONTENT = {
       about: "About",
       activities: "Activities",
       portfolio: "Portfolio",
+      faq: "FAQ",
       contact: "Contact",
     },
     hero: {
@@ -88,6 +89,11 @@ window.ESC_CONTENT = {
     portfolio: {
       title: "포트폴리오",
     },
+    faq: {
+      title: "자주 묻는 질문",
+      subtitle: "ESC에 대해 자주 묻는 내용을 확인하세요.",
+      items: [],
+    },
     contact: {
       title: "Contact",
       intro: "더 궁금한 사항이 있다면 아래 연락처를 통해 문의해 주세요.",
@@ -107,6 +113,86 @@ window.ESC_CONTENT = {
       copyright_name: "ESC",
       rights_text: "All Rights Reserved.",
       admin_label: "관리자",
+    },
+    translations: {
+      en: {
+        meta: {
+          title: "ESC — Engineering Science of Computer",
+          description:
+            "Official website of ESC, the computer engineering club at Hansung Science High School.",
+          keywords:
+            "ESC, Hansung Science High School, computer engineering club",
+        },
+        navigation: {
+          home: "Home",
+          about: "About",
+          activities: "Activities",
+          portfolio: "Portfolio",
+          faq: "FAQ",
+          contact: "Contact",
+        },
+        about: {
+          title: "About ESC",
+          body_markdown:
+            "Hello! We are ESC, the computer engineering club of Hansung Science High School.\n\nESC stands for **Engineering Science of Computer**.\n\nWe explore computer engineering through a variety of activities. Here are our plans for the {year} school year.",
+          plans_markdown:
+            "- Learn programming languages and tools useful in everyday life and research.\n- Plan and operate educational activities for middle school students.\n- Build projects and run a booth for the school festival.\n- Exchange ideas with other computer science clubs.",
+        },
+        activity_plans: {
+          title: "Activity Plans",
+          subtitle: "ESC activities for the {year} school year.",
+          items: [
+            {
+              title: "Math and Science Experience Fair",
+              description:
+                "We plan and run hands-on learning activities for middle school students at the fair hosted by Hansung Science High School and Seodaemun-gu.",
+              icon: "bi-mortarboard-fill",
+            },
+            {
+              title: "Han-eoul School Festival",
+              description:
+                "We build a project based on the year's activities and operate an interactive festival booth.",
+              icon: "bi-shop-window",
+            },
+            {
+              title: "Seoul Student AI Development Showcase",
+              description:
+                "We present projects developed by ESC at the Seoul Metropolitan Office of Education showcase.",
+              icon: "bi-robot",
+            },
+            {
+              title: "Exchange with Sejong Science High School",
+              description:
+                "We exchange ideas and activities with CPU, Sejong Science High School's computer science club.",
+              icon: "bi-people-fill",
+            },
+            {
+              title: "Programming Languages",
+              description:
+                "We learn languages such as Python and C++ and apply them to AI, algorithms, and other projects.",
+              icon: "bi-code-slash",
+            },
+            {
+              title: "Git and Collaboration",
+              description:
+                "We learn collaborative workflows with Git and GitHub and apply them to team projects.",
+              icon: "bi-git",
+            },
+          ],
+        },
+        portfolio: { title: "Activity Archive" },
+        faq: {
+          title: "Frequently Asked Questions",
+          subtitle: "Find answers to common questions about ESC.",
+          items: [],
+        },
+        contact: {
+          title: "Contact",
+          intro:
+            "If you have any questions, please contact us using the information below.",
+        },
+        footer: { admin_label: "Admin" },
+      },
     },
   },
   contacts: [],
