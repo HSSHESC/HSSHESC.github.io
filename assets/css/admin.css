@@ -788,6 +788,124 @@
   font-size: 1.35rem;
 }
 
+.visitor-stats-heading {
+  align-items: flex-start;
+}
+
+.visitor-stats-heading .form-text {
+  margin: 0.35rem 0 0;
+}
+
+.visitor-stats-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.visitor-stats-controls .btn {
+  min-height: 39px;
+}
+
+.visitor-stats-summary {
+  min-height: 1.5rem;
+  margin: 1rem 0 0.5rem;
+  color: #475467;
+  font-size: 0.9rem;
+}
+
+.visitor-stats-chart {
+  min-height: 340px;
+  padding: 0.75rem;
+  border: 1px solid #e0e5ec;
+  border-radius: 4px;
+  background: #fff;
+  overflow-x: auto;
+}
+
+.visitor-stats-chart svg {
+  width: 100%;
+  min-width: 620px;
+  height: auto;
+  display: block;
+}
+
+.visitor-chart-grid {
+  stroke: #e7ebf0;
+  stroke-width: 1;
+}
+
+.visitor-chart-axis-label,
+.visitor-chart-period-label {
+  fill: #667085;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.visitor-chart-period-label {
+  text-anchor: middle;
+}
+
+.visitor-chart-line {
+  fill: none;
+  stroke: var(--secondary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.visitor-chart-area {
+  fill: rgba(0, 74, 173, 0.1);
+}
+
+.visitor-chart-point {
+  fill: #fff;
+  stroke: var(--secondary);
+  stroke-width: 2;
+}
+
+.visitor-stats-empty {
+  min-height: 310px;
+  margin: 0;
+  color: #667085;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.visitor-stats-details {
+  margin-top: 0.85rem;
+}
+
+.visitor-stats-details summary {
+  color: #344054;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.visitor-stats-table-wrap {
+  margin-top: 0.7rem;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.visitor-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.visitor-stats-table th,
+.visitor-stats-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #e2e7ee;
+  text-align: left;
+}
+
+.visitor-stats-table th:last-child,
+.visitor-stats-table td:last-child {
+  text-align: right;
+}
+
 .revision-list {
   display: grid;
   gap: 0.65rem;
@@ -849,6 +967,10 @@
 
 @media (max-width: 767px) {
   .faq-admin-row {
+    grid-template-columns: 1fr;
+  }
+
+  .visitor-stats-controls {
     grid-template-columns: 1fr;
   }
   .admin-topbar .container,

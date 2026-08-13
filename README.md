@@ -26,6 +26,7 @@ assets/js/site-content.js          공개 페이지 문구 조회와 안전한 D
 assets/js/main.js                  공개 화면 렌더링과 동작
 assets/js/public-features.js       활동 검색·학년도·유형 필터
 assets/js/admin-features.js        FAQ, 통계, 수정 이력·복원
+assets/js/visitor-analytics.js      개인정보를 저장하지 않는 고유 방문자 기록
 assets/js/faq.js                   FAQ 페이지와 FAQ 구조화 데이터
 faq.html                           공개 FAQ 페이지
 robots.txt, sitemap.xml            검색 엔진 수집·페이지 발견 설정
@@ -57,7 +58,8 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 - 이메일 또는 GitHub 유형의 연락처
 - 홈페이지 문구와 FAQ
 - 활동·페이지 문구의 수정 이력 확인과 복원
-- 관리자 전용 활동·사진·공개 상태·학년도 통계
+- 관리자 전용 활동·사진·공개 상태 통계
+- 기간을 지정할 수 있는 날짜별·월별 방문자 추이
 
 페이지 문구 편집 화면은 기본 정보, 소개, 활동 계획, 연락처, 푸터 영역마다
 별도의 저장 버튼을 제공합니다. 이메일 연락처는 입력한 주소에서 `mailto:` 링크를
@@ -76,6 +78,13 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 필터를 함께 사용할 수 있습니다. 별도의 한·영 전환 기능이나 영어 전용 콘텐츠
 입력란은 없으며, 기존 디자인에 포함된 영문 메뉴와 표현은 그대로 사용합니다.
 FAQ는 https://hsshesc.github.io/faq.html 에서 확인합니다.
+
+공개 홈페이지와 FAQ는 브라우저에 생성한 임의 식별자를 이용해 고유 방문자를
+집계합니다. IP 주소, 브라우저 정보와 방문 페이지는 저장하지 않으며 식별자도
+데이터베이스에 원문으로 저장하지 않습니다. 날짜별 식별값은 하루 단위, 월별
+식별값은 월 단위로 각각 해시하여 기간을 넘어 방문자를 추적할 수 없게 했습니다.
+방문 기록은 Supabase Cron이 매일 정리하며 1년이 지난 데이터는 자동으로
+삭제됩니다. 방문자 수는 브라우저 저장소 삭제나 차단의 영향을 받는 근사치입니다.
 
 ## 최초 관리자 계정 설정
 
@@ -116,6 +125,7 @@ where user_id = (
 마이그레이션은 다음 항목을 구성합니다.
 
 - `activities`, `activity_types`, `activity_photos`, `site_content`, `site_admins` 테이블
+- 비공개 `site_visits` 방문 기록과 관리자 전용 날짜별·월별 집계 함수
 - 공개 읽기와 관리자 쓰기를 분리한 RLS 정책
 - 명시적인 Data API `GRANT`
 - 6 MiB 이미지 제한이 적용된 비공개 `activity-images` 버킷
@@ -204,6 +214,8 @@ node .\tests\static-assets.test.cjs
 node .\tests\password-strength.test.cjs
 node .\tests\password-visibility.test.cjs
 node .\tests\account.test.cjs
+node .\tests\visitor-analytics.test.cjs
+node .\tests\visitor-analytics-migration.test.cjs
 node .\tests\supabase-public.test.cjs
 ```
 
