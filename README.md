@@ -140,7 +140,10 @@ where user_id = (
 
 `assets/js/supabase-config.js`에는 브라우저에 공개해도 되는 프로젝트 URL과
 publishable key만 들어갑니다. `service_role` 키나 secret key는 절대 넣지
-않습니다.
+않습니다. publishable key는 사용자를 식별하는 비밀번호가 아니며, 공개된
+클라이언트에서 사용하는 것을 전제로 합니다. 실제 데이터 보호는 RLS, 열 단위
+권한과 Storage 정책이 담당합니다. `.env`, 개인키와 인증서 파일은 `.gitignore`로
+커밋을 차단합니다.
 
 ## 페이지 문구와 대체 콘텐츠
 
@@ -218,6 +221,7 @@ node .\tests\account.test.cjs
 node .\tests\visitor-analytics.test.cjs
 node .\tests\visitor-analytics-migration.test.cjs
 node .\tests\cleanup-migration.test.cjs
+node .\tests\security-hardening.test.cjs
 node .\tests\supabase-public.test.cjs
 ```
 
