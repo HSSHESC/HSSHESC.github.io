@@ -137,7 +137,9 @@ runBrowserScript("assets/js/activities.js");
   assert.ok(photoRows.length > 0);
   assert.ok(
     photoRows.every((photo) =>
-      /^[0-9a-f-]{36}\/(legacy|[0-9a-f-]+)\//i.test(photo.storage_path),
+      /^[0-9a-f-]{36}\/(?:legacy\/)?[0-9a-f-]{36}\.(?:jpe?g|png|webp|gif)$/i.test(
+        photo.storage_path,
+      ),
     ),
   );
 

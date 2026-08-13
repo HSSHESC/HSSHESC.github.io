@@ -51,6 +51,11 @@ assert.ok(yearPosition >= 0);
 assert.ok(yearPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/site-content.js"));
 assert.ok(markdownPosition < indexHtml.indexOf("assets/js/main.js"));
+assert.ok(indexHtml.includes("assets/js/visitor-analytics.js"));
+assert.ok(
+  indexHtml.indexOf("assets/js/supabase-client.js") <
+    indexHtml.indexOf("assets/js/visitor-analytics.js"),
+);
 assert.ok(indexHtml.includes('id="activitySearch"'));
 assert.ok(indexHtml.includes('href="faq.html"'));
 assert.ok(
@@ -81,6 +86,9 @@ assert.ok(adminHtml.includes('id="toolsAdminView"'));
 assert.ok(adminHtml.includes('id="faqAdminItems"'));
 assert.ok(adminHtml.includes('id="revisionList"'));
 assert.ok(adminHtml.includes('id="adminStats"'));
+assert.ok(adminHtml.includes('id="visitorStatsForm"'));
+assert.ok(adminHtml.includes('id="visitorStatsChart"'));
+assert.ok(adminHtml.includes('id="visitorStatsGranularity"'));
 assert.ok(adminHtml.includes('id="adminEmail"'));
 assert.ok(adminHtml.includes('id="newActivityTypeName"'));
 assert.ok(adminHtml.includes('id="addActivityTypeButton"'));
@@ -119,10 +127,13 @@ assert.ok(accountScript.includes('from("site_admins")'));
 const adminFeaturesScript = read("assets/js/admin-features.js");
 assert.ok(!adminFeaturesScript.includes("previewSite"));
 assert.ok(!adminFeaturesScript.includes("admin-site-preview"));
+assert.ok(!adminFeaturesScript.includes('"학년도별"'));
+assert.ok(adminFeaturesScript.includes('rpc("get_site_visitor_stats"'));
 
 const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));
 assert.ok(faqHtml.includes("assets/js/faq.js"));
+assert.ok(faqHtml.includes("assets/js/visitor-analytics.js"));
 assert.ok(faqHtml.includes('rel="canonical"'));
 const extractFooter = (source) =>
   source.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
