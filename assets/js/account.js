@@ -191,7 +191,6 @@
 
       const { error: updateError } = await client.auth.updateUser({
         password: elements.newPassword.value,
-        current_password: currentPassword,
       });
 
       if (updateError) {

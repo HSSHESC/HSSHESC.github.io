@@ -68,8 +68,8 @@ supabase/migrations/               DB, RLS, Storage 구성 SQL
 학년도 문구에서 `{year}`를 사용하면 한국 시간 기준 현재 연도로 자동 표시되며,
 푸터의 저작권 연도도 같은 기준으로 매년 갱신됩니다.
 
-활동, 사진 설명과 페이지 문구는 Supabase Postgres에 저장됩니다. 기존 활동 사진
-12개와 새 사진 파일은 모두 비공개 `activity-images` Storage 버킷에 저장됩니다.
+활동, 사진 설명과 페이지 문구는 Supabase Postgres에 저장됩니다. 활동 사진 파일은
+모두 비공개 `activity-images` Storage 버킷에 저장됩니다.
 공개 홈페이지는 게시된 활동만 날짜순으로 조회하고, 공개 활동 사진에는 10분간
 유효한 서명 URL을 발급합니다. 비공개 활동과 그 사진은 RLS에 의해 관리자에게만
 반환됩니다.
@@ -81,11 +81,10 @@ FAQ는 https://hsshesc.github.io/faq.html 에서 확인합니다.
 
 공개 홈페이지와 FAQ는 브라우저에 생성한 임의 식별자를 이용해 고유 방문자를
 집계합니다. IP 주소, 브라우저 정보와 방문 페이지는 저장하지 않으며 식별자도
-데이터베이스에 원문으로 저장하지 않습니다. 날짜별 식별값은 하루 단위, 월별
-식별값은 월 단위로 각각 해시합니다. 관리자 화면의 월별 수치는 각 날짜의 고유
-방문자 수를 합산합니다. 방문 기록은 Supabase Cron이 매일 정리하며 1년이 지난
-데이터는 자동으로 삭제됩니다. 방문자 수는 브라우저 저장소 삭제나 차단의 영향을
-받는 근사치입니다.
+데이터베이스에 원문으로 저장하지 않습니다. 식별값은 날짜별로 해시하며 관리자
+화면의 월별 수치는 각 날짜의 고유 방문자 수를 합산합니다. 방문 기록은 Supabase
+Cron이 매일 정리하며 1년이 지난 데이터는 자동으로 삭제됩니다. 방문자 수는
+브라우저 저장소 삭제나 차단의 영향을 받는 근사치입니다.
 
 ## 최초 관리자 계정 설정
 
@@ -133,8 +132,9 @@ where user_id = (
 - 6 MiB 이미지 제한이 적용된 공개 `site-assets` 로고 버킷
 - 공개 활동 사진에만 서명 URL을 발급하는 Storage 조회 정책
 - 두 버킷의 업로드·수정·삭제 관리자 정책
-- 기존 포트폴리오 활동 6개, 사진 12개와 홈페이지 전체 문구
+- 기존 포트폴리오 활동·사진과 홈페이지 전체 문구
 - 활동 분류·태그 및 관리자 전용 `content_revisions` 수정 이력
+- 매시간 실행되어 3일이 지난 수정 이력을 삭제하는 Supabase Cron 작업
 - FAQ 콘텐츠
 - 언어 전환용 번역 데이터와 활동의 영어 전용 컬럼 삭제
 
@@ -157,7 +157,7 @@ Supabase 조회가 일시적으로 실패하면 `assets/js/content.js`의 페이
 
 ## 이미지 저장 위치
 
-기존 활동 사진 12개는 비공개 `activity-images` Storage로 이관되었고, 데이터베이스의
+활동 사진은 비공개 `activity-images` Storage에 저장되고 데이터베이스의
 `activity_photos.storage_path`와 연결되어 있습니다. 이관 전의 활동 이미지 폴더와
 사용하지 않는 로고 변형은 저장소에서 제거했습니다.
 
@@ -217,6 +217,7 @@ node .\tests\password-visibility.test.cjs
 node .\tests\account.test.cjs
 node .\tests\visitor-analytics.test.cjs
 node .\tests\visitor-analytics-migration.test.cjs
+node .\tests\cleanup-migration.test.cjs
 node .\tests\supabase-public.test.cjs
 ```
 

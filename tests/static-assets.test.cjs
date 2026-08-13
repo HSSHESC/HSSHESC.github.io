@@ -77,6 +77,8 @@ assert.ok(!indexHtml.includes('id="siteHeaderLogo"'));
 assert.ok(!/(?:19|20)\d{2}학년도/.test(indexHtml));
 
 const adminHtml = read("admin.html");
+assert.ok(adminHtml.includes(">ESC Admin</a>"));
+assert.ok(!adminHtml.includes("admin-brand-mark"));
 assert.ok(adminHtml.indexOf("assets/js/year.js") >= 0);
 assert.ok(
   adminHtml.indexOf("assets/js/year.js") <
@@ -104,6 +106,8 @@ assert.ok(
 );
 
 const accountHtml = read("account.html");
+assert.ok(accountHtml.includes(">ESC Admin</a>"));
+assert.ok(!accountHtml.includes("admin-brand-mark"));
 assert.ok(accountHtml.includes('id="currentPassword"'));
 assert.ok(accountHtml.includes('id="newPassword"'));
 assert.ok(accountHtml.includes('id="newPasswordConfirm"'));
@@ -124,13 +128,15 @@ assert.ok(
 const accountScript = read("assets/js/account.js");
 assert.ok(accountScript.includes("signInWithPassword"));
 assert.ok(accountScript.includes("updateUser"));
-assert.ok(accountScript.includes("current_password"));
+assert.ok(!accountScript.includes("current_password"));
 assert.ok(accountScript.includes('from("site_admins")'));
 const adminFeaturesScript = read("assets/js/admin-features.js");
 assert.ok(!adminFeaturesScript.includes("previewSite"));
 assert.ok(!adminFeaturesScript.includes("admin-site-preview"));
 assert.ok(!adminFeaturesScript.includes('"학년도별"'));
 assert.ok(adminFeaturesScript.includes('rpc("get_site_visitor_stats"'));
+assert.ok(adminFeaturesScript.includes('.upsert('));
+assert.ok(adminFeaturesScript.includes('onConflict: "id"'));
 
 const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));

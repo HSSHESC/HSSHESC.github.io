@@ -37,7 +37,7 @@
         if (value) {
           return value;
         }
-      } catch (_error) {
+      } catch {
         // Continue with the next storage option when browser storage is blocked.
       }
     }
@@ -49,7 +49,7 @@
       try {
         storage?.setItem(key, value);
         return;
-      } catch (_error) {
+      } catch {
         // Continue with the next storage option when browser storage is blocked.
       }
     }

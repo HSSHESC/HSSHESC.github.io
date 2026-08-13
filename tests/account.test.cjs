@@ -174,7 +174,6 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
   });
   assert.deepEqual(JSON.parse(JSON.stringify(authCalls.update[0])), {
     password: "new-password",
-    current_password: "current-password",
   });
   assert.equal(
     elements.accountMessage.textContent,
