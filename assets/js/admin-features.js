@@ -12,6 +12,7 @@
   const previewTitle = document.querySelector("#adminPreviewTitle");
   const previewContent = document.querySelector("#adminPreviewContent");
   const faqItems = document.querySelector("#faqAdminItems");
+  const resetFaqButton = document.querySelector("#resetFaqButton");
   const saveFaqButton = document.querySelector("#saveFaqButton");
   const revisionList = document.querySelector("#revisionList");
   const stats = document.querySelector("#adminStats");
@@ -92,8 +93,9 @@
         <input class="form-control faq-question-ko" type="text" maxlength="300" value="${escapeHtml(item.question)}" />
       </div>
       <div>
-        <label class="form-label">답변(Markdown)</label>
+        <label class="form-label">답변</label>
         <textarea class="form-control faq-answer-ko" maxlength="5000" rows="4">${escapeHtml(item.answer)}</textarea>
+        <div class="form-text">마크다운 문법으로 작성할 수 있습니다.</div>
       </div>
       <button class="btn btn-sm btn-outline-danger faq-remove" type="button">질문 삭제</button>
     `;
@@ -101,6 +103,14 @@
       .querySelector(".faq-remove")
       .addEventListener("click", () => row.remove());
     faqItems.append(row);
+  };
+
+  const renderFaqForm = () => {
+    const ko = faqContent.faq ?? {};
+    document.querySelector("#faqTitleKo").value = ko.title ?? "";
+    document.querySelector("#faqSubtitleKo").value = ko.subtitle ?? "";
+    faqItems.replaceChildren();
+    (ko.items ?? []).forEach((item) => createFaqRow(item));
   };
 
   const loadFaq = async () => {
@@ -114,11 +124,7 @@
     }
     faqContent = data.content;
     faqContentVersion = data.updated_at;
-    const ko = faqContent.faq ?? {};
-    document.querySelector("#faqTitleKo").value = ko.title ?? "";
-    document.querySelector("#faqSubtitleKo").value = ko.subtitle ?? "";
-    faqItems.replaceChildren();
-    (ko.items ?? []).forEach((item) => createFaqRow(item));
+    renderFaqForm();
   };
 
   const readFaqRows = () => {
@@ -169,6 +175,7 @@
     }
     faqContent = data.content;
     faqContentVersion = data.updated_at;
+    renderFaqForm();
     window.alert("FAQ가 저장되었습니다.");
     await Promise.all([loadStats(), loadRevisions()]);
   };
@@ -580,7 +587,15 @@
   document
     .querySelector("#addFaqButton")
     .addEventListener("click", () => createFaqRow());
+  resetFaqButton.addEventListener("click", () => {
+    if (!faqContent) {
+      window.alert("FAQ 데이터를 먼저 불러와 주세요.");
+      return;
+    }
+    renderFaqForm();
+  });
   saveFaqButton.addEventListener("click", async () => {
+    resetFaqButton.disabled = true;
     saveFaqButton.disabled = true;
     saveFaqButton.textContent = "저장 중...";
     try {
@@ -588,6 +603,7 @@
     } catch (error) {
       window.alert(`FAQ 저장 실패: ${error.message}`);
     } finally {
+      resetFaqButton.disabled = false;
       saveFaqButton.disabled = false;
       saveFaqButton.textContent = "FAQ 저장";
     }

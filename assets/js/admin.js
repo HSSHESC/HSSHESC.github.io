@@ -107,7 +107,6 @@
     navPortfolioText: document.querySelector("#navPortfolioText"),
     portfolioTitleText: document.querySelector("#portfolioTitleText"),
     resetActivityButton: document.querySelector("#resetActivityButton"),
-    resetSiteContentButton: document.querySelector("#resetSiteContentButton"),
     removeClubLogoButton: document.querySelector("#removeClubLogoButton"),
     removeSchoolLogoButton: document.querySelector("#removeSchoolLogoButton"),
     saveActivityButton: document.querySelector("#saveActivityButton"),
@@ -967,71 +966,90 @@
     );
   };
 
-  const renderSiteContentForm = () => {
+  const renderSiteContentSection = (sectionName) => {
     const content = state.siteContent ?? fallbackSiteContent;
-    elements.siteMetaTitle.value = content.meta?.title ?? "";
-    elements.siteMetaDescription.value = content.meta?.description ?? "";
-    elements.siteMetaKeywords.value = content.meta?.keywords ?? "";
-    elements.siteBrand.value = content.brand ?? "";
-    elements.clubLogoAlt.value =
-      content.branding?.club_logo_alt ??
-      `${content.brand ?? "ESC"} 동아리 로고`;
-    elements.schoolLogoAlt.value =
-      content.branding?.school_logo_alt ?? "학교 로고";
-    elements.navHomeText.value = content.navigation?.home ?? "";
-    elements.navAboutText.value = content.navigation?.about ?? "";
-    elements.navActivitiesText.value = content.navigation?.activities ?? "";
-    elements.navPortfolioText.value = content.navigation?.portfolio ?? "";
-    elements.navContactText.value = content.navigation?.contact ?? "";
-    elements.heroTitleText.value = content.hero?.title ?? "";
-    elements.heroTypedItems.value = (content.hero?.typed_items ?? []).join(
-      "\n",
-    );
-    elements.aboutTitleText.value = content.about?.title ?? "";
-    elements.aboutSchoolUrl.value = content.about?.school_url ?? "";
-    elements.aboutParagraphs.value =
-      content.about?.body_markdown ??
-      (content.about?.paragraphs ?? []).join("\n\n");
-    elements.aboutPlans.value =
-      content.about?.plans_markdown ??
-      (content.about?.plans ?? []).map((item) => `- ${item}`).join("\n");
-    elements.servicesTitleText.value = content.activity_plans?.title ?? "";
-    elements.servicesSubtitleText.value =
-      content.activity_plans?.subtitle ?? "";
-    elements.portfolioTitleText.value = content.portfolio?.title ?? "";
-    elements.contactTitleText.value = content.contact?.title ?? "";
-    elements.contactIntroText.value = content.contact?.intro ?? "";
-    const overlayColor = /^#[0-9a-f]{6}$/i.test(
-      content.appearance?.contact_overlay_color ?? "",
-    )
-      ? content.appearance.contact_overlay_color
-      : "#8b5cf6";
-    elements.contactOverlayColor.value = overlayColor;
-    elements.contactOverlayColorValue.value = overlayColor.toUpperCase();
+    if (sectionName === "basics") {
+      elements.siteMetaTitle.value = content.meta?.title ?? "";
+      elements.siteMetaDescription.value = content.meta?.description ?? "";
+      elements.siteMetaKeywords.value = content.meta?.keywords ?? "";
+      elements.siteBrand.value = content.brand ?? "";
+      elements.clubLogoAlt.value =
+        content.branding?.club_logo_alt ??
+        `${content.brand ?? "ESC"} 동아리 로고`;
+      elements.schoolLogoAlt.value =
+        content.branding?.school_logo_alt ?? "학교 로고";
+      elements.navHomeText.value = content.navigation?.home ?? "";
+      elements.navAboutText.value = content.navigation?.about ?? "";
+      elements.navActivitiesText.value = content.navigation?.activities ?? "";
+      elements.navPortfolioText.value = content.navigation?.portfolio ?? "";
+      elements.navContactText.value = content.navigation?.contact ?? "";
+      for (const kind of Object.keys(logoFields)) {
+        state.logoFiles[kind] = null;
+        state.removeLogos[kind] = false;
+        logoFields[kind].file.value = "";
+        refreshLogoPreview(kind);
+      }
+      return;
+    }
+
+    if (sectionName === "introduction") {
+      elements.heroTitleText.value = content.hero?.title ?? "";
+      elements.heroTypedItems.value = (content.hero?.typed_items ?? []).join(
+        "\n",
+      );
+      elements.aboutTitleText.value = content.about?.title ?? "";
+      elements.aboutSchoolUrl.value = content.about?.school_url ?? "";
+      elements.aboutParagraphs.value =
+        content.about?.body_markdown ??
+        (content.about?.paragraphs ?? []).join("\n\n");
+      elements.aboutPlans.value =
+        content.about?.plans_markdown ??
+        (content.about?.plans ?? []).map((item) => `- ${item}`).join("\n");
+      return;
+    }
+
+    if (sectionName === "plans") {
+      elements.servicesTitleText.value = content.activity_plans?.title ?? "";
+      elements.servicesSubtitleText.value =
+        content.activity_plans?.subtitle ?? "";
+      elements.serviceContentItems.replaceChildren();
+      (content.activity_plans?.items ?? []).forEach(appendServiceContentItem);
+      renderRepeatEmptyState(
+        elements.serviceContentItems,
+        "등록된 활동 계획 카드가 없습니다.",
+      );
+      return;
+    }
+
+    if (sectionName === "contact") {
+      elements.portfolioTitleText.value = content.portfolio?.title ?? "";
+      elements.contactTitleText.value = content.contact?.title ?? "";
+      elements.contactIntroText.value = content.contact?.intro ?? "";
+      const overlayColor = /^#[0-9a-f]{6}$/i.test(
+        content.appearance?.contact_overlay_color ?? "",
+      )
+        ? content.appearance.contact_overlay_color
+        : "#8b5cf6";
+      elements.contactOverlayColor.value = overlayColor;
+      elements.contactOverlayColorValue.value = overlayColor.toUpperCase();
+      elements.contactContentItems.replaceChildren();
+      (content.contact?.items ?? []).forEach(appendContactContentItem);
+      renderRepeatEmptyState(
+        elements.contactContentItems,
+        "등록된 연락처가 없습니다.",
+      );
+      return;
+    }
+
     elements.footerCopyrightName.value = content.footer?.copyright_name ?? "";
     elements.footerRightsText.value = content.footer?.rights_text ?? "";
     elements.footerAdminLabel.value = content.footer?.admin_label ?? "";
+  };
 
-    elements.serviceContentItems.replaceChildren();
-    (content.activity_plans?.items ?? []).forEach(appendServiceContentItem);
-    renderRepeatEmptyState(
-      elements.serviceContentItems,
-      "등록된 활동 계획 카드가 없습니다.",
+  const renderSiteContentForm = () => {
+    ["basics", "introduction", "plans", "contact", "footer"].forEach(
+      renderSiteContentSection,
     );
-
-    elements.contactContentItems.replaceChildren();
-    (content.contact?.items ?? []).forEach(appendContactContentItem);
-    renderRepeatEmptyState(
-      elements.contactContentItems,
-      "등록된 연락처가 없습니다.",
-    );
-
-    for (const kind of Object.keys(logoFields)) {
-      state.logoFiles[kind] = null;
-      state.removeLogos[kind] = false;
-      logoFields[kind].file.value = "";
-      refreshLogoPreview(kind);
-    }
   };
 
   const readSiteContentSection = (sectionName) => {
@@ -2006,10 +2024,20 @@
     } else {
       resetActivityForm();
     }
+    setMessage("활동과 사진 입력을 마지막 저장 상태로 되돌렸습니다.", "info");
   });
-  elements.resetSiteContentButton.addEventListener("click", () => {
-    clearMessage();
-    renderSiteContentForm();
+  elements.siteContentForm
+    .querySelectorAll(".reset-content-section")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const sectionName = button.dataset.section;
+        clearMessage();
+        renderSiteContentSection(sectionName);
+        setMessage(
+          `${contentSectionLabels[sectionName]} 입력을 마지막 저장 상태로 되돌렸습니다.`,
+          "info",
+        );
+      });
   });
   elements.deleteActivityButton.addEventListener("click", handleDeleteActivity);
   elements.logoutButton.addEventListener("click", async () => {
