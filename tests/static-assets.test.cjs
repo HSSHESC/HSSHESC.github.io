@@ -99,6 +99,19 @@ assert.ok(adminHtml.includes('id="addActivityTypeButton"'));
 assert.ok(adminHtml.includes('href="account.html"'));
 assert.ok(adminHtml.includes("assets/js/password-visibility.js"));
 assert.ok(!adminHtml.includes('id="previewSiteButton"'));
+assert.ok(!adminHtml.includes("추가한 유형은 바로 위 목록에서 선택할 수 있습니다."));
+assert.ok(!adminHtml.includes("비공개 활동은 관리자 화면에만 표시되고"));
+assert.ok(!adminHtml.includes("사진별 설명과 표시 순서를 수정할 수 있습니다."));
+assert.ok(!adminHtml.includes("활동과 사진, 공개 여부, 홈페이지의 소개 및 연락처 문구를"));
+assert.ok(!adminHtml.includes("저장한 내용은 공개 홈페이지의 제목, 소개, 활동 계획, 연락처와"));
+assert.ok(!adminHtml.includes("FAQ 편집, 콘텐츠 통계와 이전 버전 복원을 관리합니다."));
+assert.equal(
+  (adminHtml.match(/class="btn btn-outline-secondary reset-content-section"/g) ?? [])
+    .length,
+  5,
+);
+assert.equal((adminHtml.match(/수정 전으로 되돌리기/g) ?? []).length, 7);
+assert.ok(adminHtml.includes('id="resetFaqButton"'));
 assert.equal((adminHtml.match(/type="password"/g) ?? []).length, 1);
 assert.ok(
   adminHtml.indexOf("assets/js/password-visibility.js") <
@@ -137,6 +150,10 @@ assert.ok(!adminFeaturesScript.includes('"학년도별"'));
 assert.ok(adminFeaturesScript.includes('rpc("get_site_visitor_stats"'));
 assert.ok(adminFeaturesScript.includes('.upsert('));
 assert.ok(adminFeaturesScript.includes('onConflict: "id"'));
+assert.ok(!adminFeaturesScript.includes("답변(Markdown)"));
+assert.ok(adminFeaturesScript.includes(">답변</label>"));
+assert.ok(adminFeaturesScript.includes("마크다운 문법으로 작성할 수 있습니다."));
+assert.ok(adminFeaturesScript.includes("resetFaqButton"));
 
 const faqHtml = read("faq.html");
 assert.ok(faqHtml.includes('id="faqList"'));
@@ -166,6 +183,8 @@ const activitiesScript = read("assets/js/activities.js");
 const publicFeaturesScript = read("assets/js/public-features.js");
 assert.ok(adminScript.includes('.from("activity_types")'));
 assert.ok(adminScript.includes("handleAddActivityType"));
+assert.ok(adminScript.includes("renderSiteContentSection"));
+assert.ok(adminScript.includes('querySelectorAll(".reset-content-section")'));
 assert.ok(activitiesScript.includes("activity_type_info:activity_types(label)"));
 assert.ok(publicFeaturesScript.includes("dataset.typeLabel"));
 assert.ok(!adminHtml.includes("Dongha Lee"));

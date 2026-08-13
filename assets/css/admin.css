@@ -717,6 +717,8 @@
   border-top: 1px solid #e2e7ee;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .content-section-actions-split {
