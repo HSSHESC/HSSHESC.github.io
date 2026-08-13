@@ -23,6 +23,13 @@ const duplicateHandlingMigration = fs.readFileSync(
   ),
   "utf8",
 );
+const monthlyDailySumMigration = fs.readFileSync(
+  path.resolve(
+    __dirname,
+    "../supabase/migrations/20260813022226_sum_daily_visitors_for_monthly_stats.sql",
+  ),
+  "utf8",
+);
 
 assert.match(migration, /create table private\.site_visits/);
 assert.match(migration, /alter table private\.site_visits enable row level security/);
@@ -48,5 +55,11 @@ assert.match(duplicateHandlingMigration, /security invoker/);
 assert.match(duplicateHandlingMigration, /when unique_violation then/);
 assert.doesNotMatch(duplicateHandlingMigration, /on conflict/i);
 assert.doesNotMatch(duplicateHandlingMigration, /grant select/i);
+assert.match(monthlyDailySumMigration, /with daily_counts as/);
+assert.match(monthlyDailySumMigration, /count\(\*\)::bigint as daily_visitor_count/);
+assert.match(monthlyDailySumMigration, /coalesce\(sum\(daily_counts\.daily_visitor_count\), 0\)::bigint/);
+assert.match(monthlyDailySumMigration, /security invoker/);
+assert.doesNotMatch(monthlyDailySumMigration, /count\(\s*distinct/i);
+assert.doesNotMatch(monthlyDailySumMigration, /drop (?:column|table|index)/i);
 
 console.log("Visitor analytics schema and security checks passed.");

@@ -1,0 +1,105 @@
+begin;
+
+create or replace function public.get_site_visitor_stats(
+    p_start_date date,
+    p_end_date date,
+    p_granularity text
+)
+returns table (
+    period_start date,
+    visitor_count bigint
+)
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+    today_kst date := (now() at time zone 'Asia/Seoul')::date;
+begin
+    if not exists (
+        select 1
+        from public.site_admins
+        where site_admins.user_id = (select auth.uid())
+    ) then
+        raise exception 'Administrator access is required.'
+            using errcode = '42501';
+    end if;
+
+    if p_start_date is null or p_end_date is null then
+        raise exception 'A start date and end date are required.'
+            using errcode = '22023';
+    end if;
+
+    if p_start_date > p_end_date then
+        raise exception 'The start date must not be after the end date.'
+            using errcode = '22023';
+    end if;
+
+    if p_end_date > today_kst
+       or p_start_date < (today_kst - interval '1 year')::date then
+        raise exception 'The requested period must be within the retained year.'
+            using errcode = '22023';
+    end if;
+
+    if p_granularity not in ('day', 'month') then
+        raise exception 'Granularity must be day or month.'
+            using errcode = '22023';
+    end if;
+
+    return query
+    with daily_counts as (
+        select
+            visits.visit_date,
+            count(*)::bigint as daily_visitor_count
+        from private.site_visits as visits
+        where visits.visit_date between p_start_date and p_end_date
+        group by visits.visit_date
+    ),
+    periods as (
+        select
+            series::date as bucket_start,
+            case
+                when p_granularity = 'month' then
+                    (series + interval '1 month - 1 day')::date
+                else series::date
+            end as bucket_end
+        from generate_series(
+            case
+                when p_granularity = 'month' then
+                    date_trunc('month', p_start_date::timestamp)
+                else p_start_date::timestamp
+            end,
+            case
+                when p_granularity = 'month' then
+                    date_trunc('month', p_end_date::timestamp)
+                else p_end_date::timestamp
+            end,
+            case
+                when p_granularity = 'month' then interval '1 month'
+                else interval '1 day'
+            end
+        ) as series
+    )
+    select
+        periods.bucket_start,
+        coalesce(sum(daily_counts.daily_visitor_count), 0)::bigint
+    from periods
+    left join daily_counts
+        on daily_counts.visit_date between greatest(
+            periods.bucket_start,
+            p_start_date
+        ) and least(periods.bucket_end, p_end_date)
+    group by periods.bucket_start
+    order by periods.bucket_start;
+end;
+$$;
+
+comment on function public.get_site_visitor_stats(date, date, text) is
+    'Returns zero-filled daily unique visitor counts or monthly sums of those daily counts to site administrators for a retained period of up to one year.';
+
+revoke all on function public.get_site_visitor_stats(date, date, text)
+    from public, anon, authenticated;
+grant execute on function public.get_site_visitor_stats(date, date, text)
+    to authenticated;
+
+commit;
