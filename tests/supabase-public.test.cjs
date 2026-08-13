@@ -90,7 +90,7 @@ runBrowserScript("assets/js/activities.js");
   assert.ok(Array.isArray(siteContent.content.faq.items));
   assert.equal(
     siteContent.content.meta.description,
-    "ESC, pioneers of empty spaces",
+    "ESC, Engineering Science of Computer",
   );
   assert.equal(siteContent.content.meta.keywords, "introducing ESC");
   assert.equal(siteContent.content.navigation.home, "Home");

@@ -1405,14 +1405,14 @@
       client
         .from("activities")
         .select(
-          "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags,created_by,created_at,updated_at",
+          "id,title,description,activity_date,external_url,icon,is_published,activity_type,tags,created_at",
         )
         .order("activity_date", { ascending: false })
         .order("created_at", { ascending: false }),
       client
         .from("activity_photos")
         .select(
-          "id,activity_id,storage_path,caption,display_order,created_by,created_at,updated_at",
+          "id,activity_id,storage_path,caption,display_order,created_at",
         )
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: true }),
