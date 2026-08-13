@@ -89,6 +89,8 @@ assert.ok(adminHtml.includes('id="adminStats"'));
 assert.ok(adminHtml.includes('id="visitorStatsForm"'));
 assert.ok(adminHtml.includes('id="visitorStatsChart"'));
 assert.ok(adminHtml.includes('id="visitorStatsGranularity"'));
+assert.ok(adminHtml.includes("월별 수치는"));
+assert.ok(adminHtml.includes("날짜별 방문자 수의 합"));
 assert.ok(adminHtml.includes('id="adminEmail"'));
 assert.ok(adminHtml.includes('id="newActivityTypeName"'));
 assert.ok(adminHtml.includes('id="addActivityTypeButton"'));
