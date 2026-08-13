@@ -12,6 +12,7 @@
   const previewTitle = document.querySelector("#adminPreviewTitle");
   const previewContent = document.querySelector("#adminPreviewContent");
   const faqItems = document.querySelector("#faqAdminItems");
+  const saveFaqButton = document.querySelector("#saveFaqButton");
   const revisionList = document.querySelector("#revisionList");
   const stats = document.querySelector("#adminStats");
   const visitorStatsChart = document.querySelector("#visitorStatsChart");
@@ -34,6 +35,7 @@
   );
   let currentUser = null;
   let faqContent = null;
+  let faqContentVersion = null;
 
   const escapeHtml = (value) =>
     String(value ?? "")
@@ -59,12 +61,18 @@
     activityTab.setAttribute("aria-selected", "false");
     contentTab.setAttribute("aria-selected", "false");
     toolsTab.setAttribute("aria-selected", "true");
-    await Promise.all([
+    const results = await Promise.allSettled([
       loadFaq(),
       loadStats(),
       loadVisitorStats(),
       loadRevisions(),
     ]);
+    const failed = results.filter((result) => result.status === "rejected");
+    if (failed.length) {
+      throw new Error(
+        `운영 도구 ${failed.length}개 영역을 불러오지 못했습니다.`,
+      );
+    }
   };
 
   [activityTab, contentTab].forEach((tab) =>
@@ -98,13 +106,14 @@
   const loadFaq = async () => {
     const { data, error } = await client
       .from("site_content")
-      .select("content")
+      .select("content,updated_at")
       .eq("id", "home")
       .single();
     if (error) {
       throw error;
     }
     faqContent = data.content;
+    faqContentVersion = data.updated_at;
     const ko = faqContent.faq ?? {};
     document.querySelector("#faqTitleKo").value = ko.title ?? "";
     document.querySelector("#faqSubtitleKo").value = ko.subtitle ?? "";
@@ -123,23 +132,43 @@
   };
 
   const saveFaq = async () => {
-    if (!currentUser || !faqContent) {
-      return;
+    if (!faqContent || !faqContentVersion) {
+      throw new Error("FAQ 데이터를 먼저 불러와 주세요.");
     }
+    const {
+      data: { user },
+      error: userError,
+    } = await client.auth.getUser();
+    if (userError || !user) {
+      throw userError ?? new Error("관리자 로그인 정보를 확인할 수 없습니다.");
+    }
+    currentUser = user;
+
     const nextContent = JSON.parse(JSON.stringify(faqContent));
     nextContent.faq = {
       title: document.querySelector("#faqTitleKo").value.trim(),
       subtitle: document.querySelector("#faqSubtitleKo").value.trim(),
       items: readFaqRows(),
     };
-    const { error } = await client
+    const { data, error } = await client
       .from("site_content")
       .update({ content: nextContent, updated_by: currentUser.id })
-      .eq("id", "home");
+      .eq("id", "home")
+      .eq("updated_at", faqContentVersion)
+      .select("content,updated_at")
+      .maybeSingle();
     if (error) {
       throw error;
     }
-    faqContent = nextContent;
+    if (!data) {
+      const conflictError = new Error(
+        "다른 곳에서 홈페이지 내용이 변경되었습니다. 새로고침 후 다시 저장해 주세요.",
+      );
+      conflictError.code = "CONTENT_CONFLICT";
+      throw conflictError;
+    }
+    faqContent = data.content;
+    faqContentVersion = data.updated_at;
     window.alert("FAQ가 저장되었습니다.");
     await Promise.all([loadStats(), loadRevisions()]);
   };
@@ -154,9 +183,17 @@
   };
 
   const shiftYear = (dateText, years) => {
-    const date = new Date(`${dateText}T00:00:00Z`);
-    date.setUTCFullYear(date.getUTCFullYear() + years);
-    return date.toISOString().slice(0, 10);
+    const [year, month, day] = dateText.split("-").map(Number);
+    const targetYear = year + years;
+    const daysInTargetMonth = new Date(
+      Date.UTC(targetYear, month, 0),
+    ).getUTCDate();
+    const targetDay = Math.min(day, daysInTargetMonth);
+    return [
+      targetYear,
+      String(month).padStart(2, "0"),
+      String(targetDay).padStart(2, "0"),
+    ].join("-");
   };
 
   const initializeVisitorStatsDates = () => {
@@ -437,31 +474,48 @@
         <div><strong>${escapeHtml(name)}</strong><span>${escapeHtml(new Date(revision.created_at).toLocaleString("ko-KR"))}</span></div>
         <button class="btn btn-sm btn-outline-primary" type="button">이 버전 복원</button>
       `;
-      row.querySelector("button").addEventListener("click", async () => {
+      const restoreButton = row.querySelector("button");
+      restoreButton.addEventListener("click", async () => {
         if (!window.confirm(`‘${name}’의 이 버전으로 복원하시겠습니까?`)) {
           return;
         }
-        const { error: restoreError } = await restoreRevision(revision);
-        if (restoreError) {
+        restoreButton.disabled = true;
+        restoreButton.textContent = "복원 중...";
+        try {
+          await restoreRevision(revision);
+          window.alert("복원되었습니다. 최신 데이터를 다시 불러옵니다.");
+          window.location.reload();
+        } catch (restoreError) {
           window.alert(`복원하지 못했습니다: ${restoreError.message}`);
-          return;
+          restoreButton.disabled = false;
+          restoreButton.textContent = "이 버전 복원";
         }
-        window.alert("복원되었습니다. 최신 데이터를 다시 불러옵니다.");
-        window.location.reload();
       });
       revisionList.append(row);
     });
   };
 
-  const restoreRevision = (revision) => {
+  const restoreRevision = async (revision) => {
+    if (!currentUser) {
+      throw new Error("관리자 로그인 정보를 확인할 수 없습니다.");
+    }
     if (revision.entity_type === "site_content") {
-      return client
+      const { error } = await client
         .from("site_content")
-        .update({
-          content: revision.snapshot.content,
-          updated_by: currentUser.id,
-        })
-        .eq("id", revision.entity_id);
+        .upsert(
+          {
+            id: revision.entity_id,
+            content: revision.snapshot.content,
+            updated_by: currentUser.id,
+          },
+          { onConflict: "id" },
+        )
+        .select("id")
+        .single();
+      if (error) {
+        throw error;
+      }
+      return;
     }
     const allowed = [
       "title",
@@ -472,16 +526,29 @@
       "is_published",
       "activity_type",
       "tags",
+      "created_at",
+      "created_by",
     ];
     const payload = Object.fromEntries(
       allowed
         .filter((key) => revision.snapshot[key] !== undefined)
         .map((key) => [key, revision.snapshot[key]]),
     );
-    return client
+    const { error } = await client
       .from("activities")
-      .update(payload)
-      .eq("id", revision.entity_id);
+      .upsert(
+        {
+          ...payload,
+          id: revision.entity_id,
+          created_by: payload.created_by ?? currentUser.id,
+        },
+        { onConflict: "id" },
+      )
+      .select("id")
+      .single();
+    if (error) {
+      throw error;
+    }
   };
 
   const previewActivity = () => {
@@ -505,18 +572,26 @@
   toolsTab.addEventListener("click", () => {
     activateTools().catch((error) => {
       console.error("운영 도구를 불러오지 못했습니다.", error);
+      window.alert(
+        "운영 도구의 일부 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      );
     });
   });
   document
     .querySelector("#addFaqButton")
     .addEventListener("click", () => createFaqRow());
-  document
-    .querySelector("#saveFaqButton")
-    .addEventListener("click", () =>
-      saveFaq().catch((error) =>
-        window.alert(`FAQ 저장 실패: ${error.message}`),
-      ),
-    );
+  saveFaqButton.addEventListener("click", async () => {
+    saveFaqButton.disabled = true;
+    saveFaqButton.textContent = "저장 중...";
+    try {
+      await saveFaq();
+    } catch (error) {
+      window.alert(`FAQ 저장 실패: ${error.message}`);
+    } finally {
+      saveFaqButton.disabled = false;
+      saveFaqButton.textContent = "FAQ 저장";
+    }
+  });
   document
     .querySelector("#refreshRevisionsButton")
     .addEventListener("click", () =>
@@ -541,8 +616,17 @@
   client.auth.onAuthStateChange((_event, session) => {
     currentUser = session?.user ?? null;
   });
-  client.auth.getUser().then(({ data }) => {
-    currentUser = data.user ?? currentUser;
-  });
+  client.auth
+    .getUser()
+    .then(({ data, error }) => {
+      if (error) {
+        throw error;
+      }
+      currentUser = data.user ?? currentUser;
+    })
+    .catch((error) => {
+      currentUser = null;
+      console.error("관리자 로그인 정보를 확인하지 못했습니다.", error);
+    });
   initializeVisitorStatsDates();
 })();

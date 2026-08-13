@@ -138,6 +138,7 @@
     selectedActivityId: null,
     siteContentSaveInProgress: false,
     siteContent: null,
+    siteContentVersion: null,
     logoFiles: { club: null, school: null },
     logoPreviewUrls: { club: null, school: null },
     removeLogos: { club: false, school: false },
@@ -1173,7 +1174,7 @@
   const loadSiteContent = async () => {
     const { data, error } = await client
       .from("site_content")
-      .select("content")
+      .select("content,updated_at")
       .eq("id", "home")
       .maybeSingle();
 
@@ -1184,6 +1185,7 @@
     state.siteContent = normalizeSiteContent(
       mergeContent(fallbackSiteContent, data?.content ?? {}),
     );
+    state.siteContentVersion = data?.updated_at ?? null;
     renderSiteContentForm();
   };
 
@@ -1253,21 +1255,36 @@
       const nextContent = normalizeSiteContent(
         mergeContent(state.siteContent ?? fallbackSiteContent, sectionContent),
       );
-      const { data, error } = await client
-        .from("site_content")
-        .upsert(
-          { id: "home", content: nextContent, updated_by: user.id },
-          { onConflict: "id" },
-        )
-        .select("content")
-        .single();
+      const contentPayload = {
+        id: "home",
+        content: nextContent,
+        updated_by: user.id,
+      };
+      const saveQuery = state.siteContentVersion
+        ? client
+            .from("site_content")
+            .update(contentPayload)
+            .eq("id", "home")
+            .eq("updated_at", state.siteContentVersion)
+        : client.from("site_content").insert(contentPayload);
+      const { data, error } = await saveQuery
+        .select("content,updated_at")
+        .maybeSingle();
       if (error) {
         throw error;
+      }
+      if (!data) {
+        const conflictError = new Error(
+          "Homepage content was changed by another session.",
+        );
+        conflictError.code = "CONTENT_CONFLICT";
+        throw conflictError;
       }
 
       state.siteContent = normalizeSiteContent(
         mergeContent(fallbackSiteContent, data.content),
       );
+      state.siteContentVersion = data.updated_at;
       let cleanupWarning = false;
       if (sectionName === "basics") {
         const pathsToRemove = Object.entries(logoFields).flatMap(
@@ -1319,8 +1336,10 @@
       }
       console.error("페이지 영역 저장에 실패했습니다.", error);
       setMessage(
-        `${contentSectionLabels[sectionName]} 영역을 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.`,
-        "danger",
+        error.code === "CONTENT_CONFLICT"
+          ? "다른 곳에서 홈페이지 내용이 변경되었습니다. 페이지를 새로고침한 뒤 다시 저장해 주세요."
+          : `${contentSectionLabels[sectionName]} 영역을 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.`,
+        error.code === "CONTENT_CONFLICT" ? "warning" : "danger",
       );
     } finally {
       setSiteContentBusy(sectionName, false);
@@ -1433,6 +1452,7 @@
     state.selectedActivityId = null;
     state.newFiles = [];
     state.siteContent = null;
+    state.siteContentVersion = null;
     revokePreviewUrls();
     Object.keys(state.logoPreviewUrls).forEach(revokeLogoPreview);
     elements.loginSection.hidden = false;
@@ -1631,6 +1651,7 @@
 
     setEditorBusy(true);
     let savedActivityId = elements.activityId.value || null;
+    let savePhase = "activity";
 
     try {
       const {
@@ -1681,32 +1702,44 @@
       }
 
       savedActivityId = saveResult.data.id;
+      elements.activityId.value = savedActivityId;
+      state.selectedActivityId = savedActivityId;
       const activity = {
         id: saveResult.data.id,
         title: payload.title,
       };
 
+      savePhase = "photos";
       await saveExistingPhotoMetadata();
       await uploadNewPhotos(activity, user);
 
       state.newFiles = [];
       elements.newPhotos.value = "";
+      savePhase = "reload";
       await loadActivities(savedActivityId);
       setMessage("활동 정보가 저장되었습니다.", "success");
     } catch (error) {
       console.error("활동 저장에 실패했습니다.", error);
+      const failureMessage =
+        savePhase === "photos"
+          ? "활동 기본 정보는 저장되었지만 사진을 처리하지 못했습니다. 선택한 사진은 유지되므로 네트워크 상태를 확인한 뒤 다시 저장해 주세요."
+          : savePhase === "reload"
+            ? "활동과 사진은 저장되었지만 최신 화면을 불러오지 못했습니다. 페이지를 새로고침해 주세요."
+            : "활동을 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.";
       setMessage(
-        "활동을 저장하지 못했습니다. 입력 내용과 네트워크 상태를 확인해 주세요.",
-        "danger",
+        failureMessage,
+        savePhase === "activity" ? "danger" : "warning",
       );
 
-      try {
-        await loadActivities(savedActivityId);
-      } catch (reloadError) {
-        console.error(
-          "저장 실패 후 데이터를 다시 불러오지 못했습니다.",
-          reloadError,
-        );
+      if (savePhase === "activity") {
+        try {
+          await loadActivities(savedActivityId);
+        } catch (reloadError) {
+          console.error(
+            "저장 실패 후 데이터를 다시 불러오지 못했습니다.",
+            reloadError,
+          );
+        }
       }
     } finally {
       setEditorBusy(false);
