@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="assets/js/origin-guard.js"></script>
     <meta content="noindex, nofollow" name="robots" />
 
     <title>ESC 관리자 계정 관리</title>
@@ -79,6 +80,104 @@
 
       <section
         class="admin-panel account-management-card"
+        id="mfaSetupSection"
+        hidden
+      >
+        <div class="admin-card-heading">
+          <span class="admin-heading-icon" aria-hidden="true">
+            <i class="bi bi-shield-lock"></i>
+          </span>
+          <div>
+            <h1>2단계 인증 등록</h1>
+            <p>관리자 권한을 사용하려면 인증 앱 등록이 필요합니다.</p>
+          </div>
+        </div>
+
+        <ol class="mfa-steps">
+          <li>인증 앱에서 아래 QR 코드를 스캔합니다.</li>
+          <li>인증 앱에 표시된 6자리 코드를 입력합니다.</li>
+          <li>등록 후 관리자 페이지로 이동합니다.</li>
+        </ol>
+
+        <div class="mfa-enrollment-details">
+          <img id="mfaQrCode" alt="ESC 관리자 2단계 인증 QR 코드" />
+          <div>
+            <p class="mb-2">
+              QR 코드를 사용할 수 없다면 다음 키를 직접 입력하세요.
+            </p>
+            <code class="mfa-secret" id="mfaSecret"></code>
+            <p class="mfa-security-note">
+              이 키는 관리자 계정의 두 번째 인증 수단입니다. 공개하거나
+              공유하지 마세요.
+            </p>
+          </div>
+        </div>
+
+        <form id="mfaEnrollForm">
+          <label class="form-label" for="mfaEnrollCode">인증 앱 코드</label>
+          <div class="mfa-code-row">
+            <input
+              class="form-control"
+              id="mfaEnrollCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+            />
+            <button
+              class="btn admin-primary-button"
+              id="mfaEnrollButton"
+              type="submit"
+            >
+              등록 완료
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section
+        class="admin-panel account-management-card"
+        id="mfaChallengeSection"
+        hidden
+      >
+        <div class="admin-card-heading">
+          <span class="admin-heading-icon" aria-hidden="true">
+            <i class="bi bi-shield-check"></i>
+          </span>
+          <div>
+            <h1>2단계 인증</h1>
+            <p>인증 앱에 표시된 6자리 코드를 입력하세요.</p>
+          </div>
+        </div>
+
+        <form id="mfaChallengeForm">
+          <label class="form-label" for="mfaChallengeCode">인증 앱 코드</label>
+          <div class="mfa-code-row">
+            <input
+              class="form-control"
+              id="mfaChallengeCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxlength="6"
+              required
+            />
+            <button
+              class="btn admin-primary-button"
+              id="mfaChallengeButton"
+              type="submit"
+            >
+              인증
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section
+        class="admin-panel account-management-card"
         id="accountSection"
         hidden
       >
@@ -88,7 +187,9 @@
           </span>
           <div>
             <h1>계정 관리</h1>
-            <p>현재 비밀번호를 확인한 뒤 새 비밀번호로 변경합니다.</p>
+            <p>
+              현재 비밀번호와 2단계 인증을 확인한 뒤 새 비밀번호로 변경합니다.
+            </p>
           </div>
         </div>
 
@@ -158,6 +259,22 @@
               id="newPasswordConfirm"
               type="password"
               autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="passwordMfaCode">
+              인증 앱 코드
+            </label>
+            <input
+              class="form-control"
+              id="passwordMfaCode"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxlength="6"
               required
             />
           </div>

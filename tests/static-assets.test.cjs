@@ -11,6 +11,11 @@ const missing = [];
 
 htmlFiles.forEach((relativePath) => {
   const source = read(relativePath);
+  assert.ok(source.includes('src="assets/js/origin-guard.js"'));
+  assert.ok(
+    source.indexOf('src="assets/js/origin-guard.js"') <
+      source.indexOf("</head>"),
+  );
   for (const match of source.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
     const reference = match[1];
     if (/^(?:https?:|mailto:|#|data:)/i.test(reference)) {
@@ -125,6 +130,10 @@ assert.ok(accountHtml.includes('id="currentPassword"'));
 assert.ok(accountHtml.includes('id="newPassword"'));
 assert.ok(accountHtml.includes('id="newPasswordConfirm"'));
 assert.ok(accountHtml.includes('id="passwordStrengthMeter"'));
+assert.ok(accountHtml.includes('id="mfaSetupSection"'));
+assert.ok(accountHtml.includes('id="mfaChallengeSection"'));
+assert.ok(accountHtml.includes('id="mfaQrCode"'));
+assert.ok(accountHtml.includes('id="passwordMfaCode"'));
 assert.ok(accountHtml.includes('role="progressbar"'));
 assert.ok(accountHtml.includes("assets/js/password-strength.js"));
 assert.ok(accountHtml.includes("assets/js/password-visibility.js"));
@@ -141,6 +150,9 @@ assert.ok(
 const accountScript = read("assets/js/account.js");
 assert.ok(accountScript.includes("signInWithPassword"));
 assert.ok(accountScript.includes("updateUser"));
+assert.ok(accountScript.includes("challengeAndVerify"));
+assert.ok(accountScript.includes("getAuthenticatorAssuranceLevel"));
+assert.ok(accountScript.includes('currentLevel !== "aal2"'));
 assert.ok(!accountScript.includes("current_password"));
 assert.ok(accountScript.includes('from("site_admins")'));
 const adminFeaturesScript = read("assets/js/admin-features.js");

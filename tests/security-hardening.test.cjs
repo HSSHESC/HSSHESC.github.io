@@ -15,6 +15,13 @@ const config = fs.readFileSync(
   path.join(projectRoot, "assets/js/supabase-config.js"),
   "utf8",
 );
+const mfaMigration = fs.readFileSync(
+  path.join(
+    projectRoot,
+    "supabase/migrations/20260815161911_require_admin_mfa.sql",
+  ),
+  "utf8",
+);
 
 assert.match(migration, /record_site_visit[\s\S]*security definer/i);
 assert.match(migration, /get_site_visitor_stats[\s\S]*security definer/i);
@@ -29,6 +36,19 @@ assert.match(
 assert.match(migration, /drop policy if exists site_visits_insert_tracking/i);
 assert.match(migration, /grant select \(id, content\).*to anon/is);
 assert.match(config, /publishableKey:\s*"sb_publishable_/);
+assert.match(config, /officialOrigin:\s*"https:\/\/hsshesc\.github\.io"/);
+assert.match(
+  mfaMigration,
+  /alter policy activities_insert_admin[\s\S]*auth\.jwt\(\)[\s\S]*aal2/i,
+);
+assert.match(
+  mfaMigration,
+  /alter policy site_assets_admin_update[\s\S]*auth\.jwt\(\)[\s\S]*aal2/i,
+);
+assert.match(
+  mfaMigration,
+  /get_site_visitor_stats[\s\S]*Multi-factor authentication is required/i,
+);
 
 const textFilePattern = /(?:^|\/)(?:[^/]+\.(?:c?js|css|html|ini|json|md|sql|toml|txt|ya?ml)|\.env\.example)$/i;
 const trackedSources = execFileSync(
