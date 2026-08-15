@@ -37,7 +37,14 @@ const context = vm.createContext({
       storage.set(key, String(value));
     },
   },
-  location: { href: "http://localhost/" },
+  location: {
+    href: "https://hsshesc.github.io/",
+    origin: "https://hsshesc.github.io",
+    pathname: "/",
+    replace() {
+      throw new Error("The official origin must not be redirected.");
+    },
+  },
   navigator: { onLine: true },
   setInterval,
   setTimeout,
@@ -53,6 +60,7 @@ const runBrowserScript = (relativePath) => {
 };
 
 runBrowserScript("assets/vendor/supabase/supabase.js");
+runBrowserScript("assets/js/origin-guard.js");
 runBrowserScript("assets/js/supabase-config.js");
 runBrowserScript("assets/js/supabase-client.js");
 runBrowserScript("assets/js/activities.js");

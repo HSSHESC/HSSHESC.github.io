@@ -956,6 +956,58 @@
   box-shadow: inset 0 0 0 1px #e0e5ec;
 }
 
+.mfa-steps {
+  margin: 0 0 1.5rem;
+  padding-left: 1.3rem;
+  color: #344054;
+}
+
+.mfa-steps li + li {
+  margin-top: 0.35rem;
+}
+
+.mfa-enrollment-details {
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+}
+
+#mfaQrCode {
+  width: 220px;
+  height: 220px;
+  padding: 0.55rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.mfa-secret {
+  display: block;
+  max-width: 100%;
+  padding: 0.7rem;
+  overflow-wrap: anywhere;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #101828;
+  font-size: 0.92rem;
+  user-select: all;
+}
+
+.mfa-security-note {
+  margin: 0.65rem 0 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.mfa-code-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem;
+}
+
 @media (max-width: 991px) {
   .activity-list-panel {
     position: static;
@@ -981,6 +1033,17 @@
 
   .logo-upload-editor {
     grid-template-columns: 1fr;
+  }
+
+  .mfa-enrollment-details,
+  .mfa-code-row {
+    grid-template-columns: 1fr;
+  }
+
+  #mfaQrCode {
+    width: min(220px, 100%);
+    height: auto;
+    aspect-ratio: 1;
   }
 
   .admin-account-actions {

@@ -1503,6 +1503,16 @@
       return false;
     }
 
+    const { data: assurance, error: assuranceError } =
+      await client.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assuranceError) {
+      throw assuranceError;
+    }
+    if (assurance.currentLevel !== "aal2") {
+      window.location.replace("account.html");
+      return false;
+    }
+
     state.currentUser = user;
     elements.loginSection.hidden = true;
     elements.dashboardSection.hidden = false;
